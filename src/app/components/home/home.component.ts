@@ -67,7 +67,7 @@ export class HomeComponent implements OnInit {
         this.matrizX[j][i] = this.matrizXT[i][j];
       }
     }
-    console.log(this.matrizXT);
+    console.log(this.matrizX);
     this.resT = true;
   }
 
