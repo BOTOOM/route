@@ -1,9 +1,34 @@
 <div>
+    <mat-card>
   <h2>Ingrese el numero de columnas <span class="badge badge-secondary">matriz cuadrada</span></h2>
   
   <mat-form-field appearance="outline" style="width: 10%;" >
     <mat-label> Max: 10 </mat-label>
-    <input matInput placeholder="" type="number" min="0" max="10">
-  </mat-form-field>
+    <input matInput placeholder="" type="number" min="0" max="10" [(ngModel)]="tamano">
+  </mat-form-field> <br>
+  <button type="button" class="btn btn-primary" (click)="crearMatriz()">Crear matriz</button>
+</mat-card>
+</div>
+<br>
+<div *ngIf="Qon">
+    <mat-card>
+  <h2>Matriz <span class="badge badge-secondary">Q</span></h2>
+  <br>
 
+  <table class="table">
+      <thead>
+      </thead>
+      <tbody>
+        <tr *ngFor="let Qs of matrizQ let i = index">
+          <td *ngFor="let Q of Qs let j = index"> 
+            <mat-form-field appearance="outline" style="width: 20%;" >
+                <mat-label> {{Q}} </mat-label>
+                <input matInput placeholder="" type="number" min="0" [(ngModel)]="matrizQ[i][j]">
+              </mat-form-field>
+          </td>
+        </tr>
+      </tbody>
+    </table> <br>
+    <button type="button" class="btn btn-primary" (click)="obtenerQ()">Ingresar</button>
+</mat-card>
 </div>
