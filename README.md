@@ -1,3 +1,10 @@
+# Proyecto elaborado por :
+- Edwar Diaz Ruiz **Cod: 20141020004**
+
+## En colaboracion de :
+- Carlos Arturo Obregon Ravelo **Cod: 20141020009**
+---
+
 # Matriz
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.3.
