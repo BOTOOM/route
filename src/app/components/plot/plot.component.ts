@@ -15,6 +15,7 @@ export class PlotComponent implements OnInit {
   valores = [];
   cant: boolean;
   plot: boolean;
+  res: boolean;
   posiblesRes = [];
 
   public scatterChartOptions: ChartOptions = {
@@ -43,6 +44,7 @@ export class PlotComponent implements OnInit {
   constructor() {
     this.cant = false;
     this.plot = false;
+    this.res = false;
    }
 
   ngOnInit() {
@@ -62,10 +64,11 @@ export class PlotComponent implements OnInit {
     this.posiblesRes = [];
     for (let i = 0; i < this.cantidad; i++) {
       this.restriciones[i] = new Array(2);
-      this.posiblesRes[i] = new Array(3);
+      this.posiblesRes[i] = new Array(4);
     }
     this.cant = true;
     this.plot = false;
+    this.res = false;
   }
 
   crearValores() {
@@ -105,14 +108,17 @@ export class PlotComponent implements OnInit {
           this.posiblesRes[j][0] = cx1 * (-1);
           this.posiblesRes[j][1] = cy1 * (-1);
           this.posiblesRes[j][2] = c * (-1);
+          this.posiblesRes[j][3] = -1;
         } else {
           this.posiblesRes[j][0] = cx1;
           this.posiblesRes[j][1] = cy1;
           this.posiblesRes[j][2] = c;
+          this.posiblesRes[j][3] = 1;
         }
       }
     }
     console.log(this.posiblesRes);
+    this.res = true;
   }
 
 }

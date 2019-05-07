@@ -49,3 +49,21 @@
     </div>
   </mat-card>
 </div>
+<br>
+<div *ngIf="res">
+    <mat-card>
+        <h2>Posibles <span class="badge badge-secondary">Restricciones</span></h2>
+        <ul class="list-group">
+            <li class="list-group-item" *ngFor="let posible of posiblesRes">
+              <div *ngIf="posible[2] > 0">
+                <div *ngIf="posible[3] = -1">
+                    - <Sup> 1 </Sup> / <sub> {{posible[0]}} </sub>*X + <Sup> 1 </Sup> / <sub> {{posible[1]}} </sub>*Y &lt; = {{posible[2]}}
+                </div>
+                <div *ngIf="posible[3] = 1">
+                    <Sup> 1 </Sup> / <sub> {{posible[0]}} </sub>*X - <Sup> 1 </Sup> / <sub> {{posible[1]}} </sub>*Y &lt; = {{posible[2]}}
+                </div>
+              </div>
+            </li>
+          </ul>
+      </mat-card>
+</div>
