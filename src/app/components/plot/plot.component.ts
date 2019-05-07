@@ -15,6 +15,7 @@ export class PlotComponent implements OnInit {
   valores = [];
   cant: boolean;
   plot: boolean;
+  posiblesRes = [];
 
   public scatterChartOptions: ChartOptions = {
     responsive: true,
@@ -56,25 +57,12 @@ export class PlotComponent implements OnInit {
     console.log(event, active);
   }
 
-  mostrarDatos() {
-    // console.log(this.scatterChartData[0]['data']);
-    // const valor =  [
-    //       { x: 13, y: 4 },
-    // ];
-    // valor.push(
-    //   {
-    //     x: 3,
-    //     y: 4,
-    //   }
-    // );
-    this.scatterChartData[0].data = this.valores;
-    this.plot = true;
-  }
-
   crearCampos() {
     this.restriciones = [];
+    this.posiblesRes = [];
     for (let i = 0; i < this.cantidad; i++) {
       this.restriciones[i] = new Array(2);
+      this.posiblesRes[i] = new Array(3);
     }
     this.cant = true;
     this.plot = false;
@@ -92,6 +80,39 @@ export class PlotComponent implements OnInit {
     }
     console.log(this.valores);
     this.mostrarDatos();
+  }
+
+  mostrarDatos() {
+    this.scatterChartData[0].data = this.valores;
+    this.plot = true;
+    this.restricion();
+  }
+
+  restricion() {
+    for (let j = 0; j < this.restriciones.length - 1; j++) {
+      if ( (this.restriciones[j + 1][0] !== null ) && (this.restriciones[j + 1][0] !== undefined ) ) {
+        // toma los valores x2 y x1 para el denominador de X , cx1 es el denominador de X
+        const cx1 = this.restriciones[j + 1][0] - this.restriciones[j][0];
+        // toma los valores y2 y y1 para el denominador de Y, cy1 es el denominador de y
+        const cy1 = this.restriciones[j + 1][1] - this.restriciones[j][1];
+        // toma los valores x2 y x1 parala constante generada por X , cx2 es constante
+        const cx2 = (this.restriciones[j][0]) / (this.restriciones[j + 1][0] - this.restriciones[j][0]);
+        // toma los valores y2 y y1 parala constante generada por Y , cy2 es constante
+        const cy2 = (this.restriciones[j][1]) / (this.restriciones[j + 1][1] - this.restriciones[j][1]);
+        // c es contante resultante de cx2 - cy2
+        const c = cx2 - cy2;
+        if (c < 0) {
+          this.posiblesRes[j][0] = cx1 * (-1);
+          this.posiblesRes[j][1] = cy1 * (-1);
+          this.posiblesRes[j][2] = c * (-1);
+        } else {
+          this.posiblesRes[j][0] = cx1;
+          this.posiblesRes[j][1] = cy1;
+          this.posiblesRes[j][2] = c;
+        }
+      }
+    }
+    console.log(this.posiblesRes);
   }
 
 }
