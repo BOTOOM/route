@@ -9,6 +9,13 @@ import { Label } from 'ng2-charts';
 })
 export class PlotComponent implements OnInit {
 
+  items = [];
+  cantidad: number;
+  restriciones = [];
+  valores = [];
+  cant: boolean;
+  plot: boolean;
+
   public scatterChartOptions: ChartOptions = {
     responsive: true,
   };
@@ -18,20 +25,24 @@ export class PlotComponent implements OnInit {
   public scatterChartData: ChartDataSets[] = [
     {
       data: [
-        { x: 1, y: 1 },
-        { x: 2, y: 3 },
-        { x: 3, y: -2 },
-        { x: 4, y: 4 },
-        { x: 5, y: -3 },
+        { x: 0, y: 0 },
+        // { x: 0, y: 14 },
+        // { x: 3, y: 12 },
+        // { x: 6, y: 6 },
+        // { x: 8, y: 0 },
+        // { x: 11, y: 0 },
       ],
-      label: 'Series A',
+      label: 'Puntos',
       pointRadius: 10,
     },
   ];
 
   public scatterChartType: ChartType = 'scatter';
 
-  constructor() { }
+  constructor() {
+    this.cant = false;
+    this.plot = false;
+   }
 
   ngOnInit() {
   }
@@ -43,6 +54,44 @@ export class PlotComponent implements OnInit {
 
   public chartHovered({ event, active }: { event: MouseEvent, active: {}[] }): void {
     console.log(event, active);
+  }
+
+  mostrarDatos() {
+    // console.log(this.scatterChartData[0]['data']);
+    // const valor =  [
+    //       { x: 13, y: 4 },
+    // ];
+    // valor.push(
+    //   {
+    //     x: 3,
+    //     y: 4,
+    //   }
+    // );
+    this.scatterChartData[0].data = this.valores;
+    this.plot = true;
+  }
+
+  crearCampos() {
+    this.restriciones = [];
+    for (let i = 0; i < this.cantidad; i++) {
+      this.restriciones[i] = new Array(2);
+    }
+    this.cant = true;
+    this.plot = false;
+  }
+
+  crearValores() {
+    this.valores = [];
+    for (let i = 0; i < this.restriciones.length; i++) {
+      this.valores.push(
+        {
+          x: this.restriciones[i][0],
+          y: this.restriciones[i][1],
+        }
+      );
+    }
+    console.log(this.valores);
+    this.mostrarDatos();
   }
 
 }
