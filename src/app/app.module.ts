@@ -12,6 +12,7 @@ import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/shared/navbar/navbar.component';
 import { HomeComponent } from './components/home/home.component';
 import { MatComponent } from './components/mat/mat.component';
+import { PlotComponent } from './components/plot/plot.component';
 
 
 @NgModule({
@@ -20,6 +21,7 @@ import { MatComponent } from './components/mat/mat.component';
     NavbarComponent,
     HomeComponent,
     MatComponent,
+    PlotComponent,
   ],
   imports: [
     BrowserModule,
