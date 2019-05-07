@@ -5,24 +5,32 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule  } from '@angular/core';
 import { ThemeModule } from './theme.module';
 
+// chart
+import { ChartsModule } from 'ng2-charts';
+
 // rutas
 import {APP_ROUTING} from './app.routes';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/shared/navbar/navbar.component';
 import { HomeComponent } from './components/home/home.component';
+import { MatComponent } from './components/mat/mat.component';
+import { PlotComponent } from './components/plot/plot.component';
 
 
 @NgModule({
   declarations: [
     AppComponent,
     NavbarComponent,
-    HomeComponent
+    HomeComponent,
+    MatComponent,
+    PlotComponent,
   ],
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
+    ChartsModule,
     ReactiveFormsModule ,
     ThemeModule.forRoot(),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
