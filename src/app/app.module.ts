@@ -5,6 +5,9 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule  } from '@angular/core';
 import { ThemeModule } from './theme.module';
 
+// chart
+import { ChartsModule } from 'ng2-charts';
+
 // rutas
 import {APP_ROUTING} from './app.routes';
 
@@ -27,6 +30,7 @@ import { PlotComponent } from './components/plot/plot.component';
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
+    ChartsModule,
     ReactiveFormsModule ,
     ThemeModule.forRoot(),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
