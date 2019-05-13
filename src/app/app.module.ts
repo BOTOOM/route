@@ -16,6 +16,7 @@ import { NavbarComponent } from './components/shared/navbar/navbar.component';
 import { HomeComponent } from './components/home/home.component';
 import { MatComponent } from './components/mat/mat.component';
 import { PlotComponent } from './components/plot/plot.component';
+import { DiagramaComponent } from './components/diagrama/diagrama.component';
 
 
 @NgModule({
@@ -25,6 +26,7 @@ import { PlotComponent } from './components/plot/plot.component';
     HomeComponent,
     MatComponent,
     PlotComponent,
+    DiagramaComponent,
   ],
   imports: [
     BrowserModule,
