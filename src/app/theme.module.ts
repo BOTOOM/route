@@ -8,6 +8,9 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 // import { DocumentoService } from '../@core/data/documento.service';
 import {CdkTableModule} from '@angular/cdk/table';
 import {CdkTreeModule} from '@angular/cdk/tree';
+import {DragDropModule} from '@angular/cdk/drag-drop';
+import {ScrollingModule} from '@angular/cdk/scrolling';
+import {A11yModule} from '@angular/cdk/a11y';
 
 import {
   MatAutocompleteModule,
@@ -50,6 +53,9 @@ import {
 const MAT_MODULES = [
     CdkTableModule,
     CdkTreeModule,
+    DragDropModule,
+    ScrollingModule,
+    A11yModule,
     MatAutocompleteModule,
     MatBadgeModule,
     MatBottomSheetModule,
