@@ -3,10 +3,12 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {RouterModule} from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule  } from '@angular/core';
+// imports de componentes como material
 import { ThemeModule } from './theme.module';
 
 // chart
 import { ChartsModule } from 'ng2-charts';
+import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 // rutas
 import {APP_ROUTING} from './app.routes';
@@ -33,6 +35,7 @@ import { DiagramaComponent } from './components/diagrama/diagrama.component';
     BrowserAnimationsModule,
     FormsModule,
     ChartsModule,
+    NgxGraphModule,
     ReactiveFormsModule ,
     ThemeModule.forRoot(),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
