@@ -26,14 +26,6 @@ export class DiagramaComponent implements OnInit {
     }
   ];
 
-  clusters: ClusterNode[] = [
-    {
-      id: 'third',
-      label: 'C',
-      childNodeIds: ['c1', 'c2']
-    }
-  ];
-
   links: Edge[]  = [
     {
       id: 'a',
@@ -44,17 +36,17 @@ export class DiagramaComponent implements OnInit {
       id: 'b',
       source: 'first',
       target: 'c1',
-      label: 'custom label'
+      label: 'cosa 1'
     }, {
       id: 'c',
-      source: 'first',
-      target: 'c1',
-      label: 'custom label'
+      source: 'c1',
+      target: 'first',
+      label: 'cosa 2'
     }, {
       id: 'd',
       source: 'first',
       target: 'c2',
-      label: 'custom label'
+      label: 'cosa 3'
     }
   ];
 
