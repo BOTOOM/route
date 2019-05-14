@@ -10,44 +10,55 @@ import * as shape from 'd3-shape';
 })
 export class DiagramaComponent implements OnInit {
 
+  nombreNodo: string;
+  // nodosNuevos: Node[] = [
+  //   {
+  //     id: this.nombreNodo,
+  //     label: this.nombreNodo
+  //   },
+  // ];
+
   nodes: Node[] = [
     {
       id: 'first',
       label: 'A'
-    }, {
-      id: 'second',
-      label: 'B'
-    }, {
-      id: 'c1',
-      label: 'C1'
-    }, {
-      id: 'c2',
-      label: 'C2'
-    }
+    },
+    // {
+    //   id: 'second',
+    //   label: 'B'
+    // },
+    // {
+    //   id: 'c1',
+    //   label: 'C1'
+    // }, {
+    //   id: 'c2',
+    //   label: 'C2'
+    // }
   ];
 
   links: Edge[]  = [
-    {
-      id: 'a',
-      source: 'first',
-      target: 'second',
-      label: 'is parent of'
-    }, {
-      id: 'b',
-      source: 'first',
-      target: 'c1',
-      label: 'cosa 1'
-    }, {
-      id: 'c',
-      source: 'c1',
-      target: 'first',
-      label: 'cosa 2'
-    }, {
-      id: 'd',
-      source: 'first',
-      target: 'c2',
-      label: 'cosa 3'
-    }
+    // {
+    //   id: 'a',
+    //   source: 'first',
+    //   target: 'second',
+    //   label: 'is parent of'
+    // },
+    // {
+    //   id: 'b',
+    //   source: 'first',
+    //   target: 'c1',
+    //   label: 'cosa 1'
+    // }, {
+    //   id: 'c',
+    //   source: 'c1',
+    //   target: 'first',
+    //   label: 'cosa 2'
+    // }, {
+    //   id: 'd',
+    //   source: 'first',
+    //   target: 'c2',
+    //   label: 'cosa 3'
+    // }
   ];
 
   layout: String | Layout = 'dagreCluster';
@@ -85,10 +96,12 @@ export class DiagramaComponent implements OnInit {
   maxZoomLevel = 4.0;
   panOnZoom = true;
 
-  autoZoom = false;
-  autoCenter = false;
+  autoZoom = true;
+  autoCenter = true;
 
-  constructor() { }
+  constructor() {
+    console.log(this.nodes);
+  }
 
   ngOnInit() {
     this.setInterpolationType(this.curveType);
@@ -139,4 +152,22 @@ export class DiagramaComponent implements OnInit {
   //   }
   // }
 
+  crearNodo() {
+    this.nodes.push(
+      {
+        id: this.nombreNodo,
+        label: this.nombreNodo,
+        dimension: {
+          width: 30,
+          height: 30,
+        },
+        data: {
+          color: '#7aa3e5',
+        },
+      }
+    );
+    // this.nodes = this.nodosNuevos;
+    console.log(this.nodes);
+    // console.log(this.nodosNuevos);
+  }
 }

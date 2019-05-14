@@ -1,5 +1,16 @@
 <div>
     <mat-card>
+        <h3>ingrese un <span class="badge badge-secondary">nuevo nodo</span></h3>
+        <mat-form-field class="example-full-width">
+            <input matInput placeholder="Nombre del Nodo" value="" type="text" [(ngModel)]="nombreNodo">
+        </mat-form-field> <br>
+        <button type="button" class="btn btn-primary" (click)="crearNodo()">Crear Nodo</button>
+    </mat-card>
+</div>
+<br>
+<!-- grafico -->
+<div>
+    <mat-card>
         <div class="page">
             <ngx-graph [links]="links" [nodes]="nodes" [layout]="layout" [curve]="curve" [draggingEnabled]="draggingEnabled" [panningEnabled]="panningEnabled" [enableZoom]="zoomEnabled" [zoomSpeed]="zoomSpeed" [minZoomLevel]="minZoomLevel" [maxZoomLevel]="maxZoomLevel"
                 [panOnZoom]="panOnZoom" [autoZoom]="autoZoom" [autoCenter]="autoCenter">
