@@ -4,7 +4,25 @@
         <mat-form-field class="example-full-width">
             <input matInput placeholder="Nombre del Nodo" value="" type="text" [(ngModel)]="nombreNodo">
         </mat-form-field> <br>
-        <button type="button" class="btn btn-primary" (click)="crearNodo()">Crear Nodo</button>
+        <button type="button" class="btn btn-primary" (click)="crearNodo()">Crear Nodo</button><br>
+        <mat-form-field class="m-2">
+            <mat-label>Nodo Inicio</mat-label>
+            <mat-select [(value)]="nodoInicio" [(ngModel)]="nodoInicio">
+                <mat-option>None</mat-option>
+                <mat-option *ngFor="let nodo of nodes" value="{{nodo['id']}}">{{nodo['id']}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="m-2">
+            <mat-label>Nodo Destino</mat-label>
+            <mat-select [(value)]="nodoDestino" [(ngModel)]="nodoDestino">
+                <mat-option>None</mat-option>
+                <mat-option *ngFor="let nodo of nodes" value="{{nodo['id']}}">{{nodo['id']}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="m-2">
+            <input matInput placeholder="Peso del Nodo" value="" type="number" min="0" [(ngModel)]="pesoNodo">
+        </mat-form-field> <br>
+        <button type="button" class="btn btn-primary" (click)="crearUnion()">Crear Union</button><br>
     </mat-card>
 </div>
 <br>

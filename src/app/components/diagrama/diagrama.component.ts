@@ -11,6 +11,9 @@ import * as shape from 'd3-shape';
 export class DiagramaComponent implements OnInit {
 
   nombreNodo: string;
+  pesoNodo: number;
+  nodoInicio: string;
+  nodoDestino: string;
   // nodosNuevos: Node[] = [
   //   {
   //     id: this.nombreNodo,
@@ -20,7 +23,7 @@ export class DiagramaComponent implements OnInit {
 
   nodes: Node[] = [
     {
-      id: 'first',
+      id: 'A',
       label: 'A'
     },
     // {
@@ -39,8 +42,8 @@ export class DiagramaComponent implements OnInit {
   links: Edge[]  = [
     // {
     //   id: 'a',
-    //   source: 'first',
-    //   target: 'second',
+    //   source: 'A',
+    //   target: 'A',
     //   label: 'is parent of'
     // },
     // {
@@ -101,6 +104,7 @@ export class DiagramaComponent implements OnInit {
 
   constructor() {
     console.log(this.nodes);
+    console.log(this.links);
   }
 
   ngOnInit() {
@@ -166,8 +170,18 @@ export class DiagramaComponent implements OnInit {
         },
       }
     );
-    // this.nodes = this.nodosNuevos;
     console.log(this.nodes);
-    // console.log(this.nodosNuevos);
+  }
+
+  crearUnion() {
+    this.links.push(
+      {
+        id: `${this.nodoInicio}_${this.nodoDestino}`,
+        label: `${this.pesoNodo}`,
+        source: `${this.nodoInicio}`,
+        target: `${this.nodoDestino}`,
+      }
+    );
+    console.log(this.links);
   }
 }
