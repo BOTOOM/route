@@ -14,6 +14,27 @@ export class DiagramaComponent implements OnInit {
   pesoNodo: number;
   nodoInicio: string;
   nodoDestino: string;
+  RutaInicio: string;
+  RutaFinal: string;
+  NodosCop: any[] = [
+    {
+      id: 'A',
+      label: 'A',
+      Peso: 0,
+    },
+    // {
+    //   id: 'B',
+    //   label: 'B'
+    // },
+    // {
+    //   id: 'C',
+    //   label: 'C'
+    // },
+    // {
+    //   id: 'D',
+    //   label: 'D'
+    // }
+  ];
   // nodosNuevos: Node[] = [
   //   {
   //     id: this.nombreNodo,
@@ -26,41 +47,44 @@ export class DiagramaComponent implements OnInit {
       id: 'A',
       label: 'A'
     },
-    // {
-    //   id: 'second',
-    //   label: 'B'
-    // },
-    // {
-    //   id: 'c1',
-    //   label: 'C1'
-    // }, {
-    //   id: 'c2',
-    //   label: 'C2'
-    // }
+    {
+      id: 'B',
+      label: 'B'
+    },
+    {
+      id: 'C',
+      label: 'C'
+    },
+    {
+      id: 'D',
+      label: 'D'
+    }
   ];
 
   links: Edge[]  = [
+    {
+      id: 'AB',
+      source: 'A',
+      target: 'B',
+      label: '9'
+    },
+    {
+      id: 'BC',
+      source: 'B',
+      target: 'C',
+      label: '1'
+    },
+    {
+      id: 'DC',
+      source: 'D',
+      target: 'C',
+      label: '4'
+    },
     // {
-    //   id: 'a',
+    //   id: 'AD',
     //   source: 'A',
-    //   target: 'A',
-    //   label: 'is parent of'
-    // },
-    // {
-    //   id: 'b',
-    //   source: 'first',
-    //   target: 'c1',
-    //   label: 'cosa 1'
-    // }, {
-    //   id: 'c',
-    //   source: 'c1',
-    //   target: 'first',
-    //   label: 'cosa 2'
-    // }, {
-    //   id: 'd',
-    //   source: 'first',
-    //   target: 'c2',
-    //   label: 'cosa 3'
+    //   target: 'D',
+    //   label: '7'
     // }
   ];
 
@@ -103,8 +127,8 @@ export class DiagramaComponent implements OnInit {
   autoCenter = true;
 
   constructor() {
-    console.log(this.nodes);
-    console.log(this.links);
+    // console.log(this.nodes);
+    // console.log(this.links);
   }
 
   ngOnInit() {
@@ -170,6 +194,20 @@ export class DiagramaComponent implements OnInit {
         },
       }
     );
+    this.NodosCop.push(
+      {
+        id: this.nombreNodo,
+        label: this.nombreNodo,
+        dimension: {
+          width: 30,
+          height: 30,
+        },
+        data: {
+          color: '#7aa3e5',
+        },
+        Peso: 0,
+      }
+    );
     console.log(this.nodes);
   }
 
@@ -183,5 +221,49 @@ export class DiagramaComponent implements OnInit {
       }
     );
     console.log(this.links);
+  }
+
+  BuscarRuta() {
+    console.log(this.RutaFinal)
+    for (let i = 0; i < this.links.length; i++) {
+      if ( this.links[i].target === this.RutaFinal ) {
+        console.log(`entro al link ${this.links[i].id}`);
+        this.BuscarNodos( this.links[i].source, Number(this.links[i].label) );
+      }
+    }
+  }
+
+  BuscarNodos(NodoEntrante: string, peso: number) {
+    if (this.RutaInicio === NodoEntrante) {
+      console.log('llegue al inicio de la ruta wiiii');
+      this.CalcularPeso( peso , NodoEntrante);
+    } else {
+      console.log('bucando aun');
+      for (let i = 0; i < this.links.length; i++) {
+        if (this.links[i].target === NodoEntrante) {
+          console.log(`entro al link ${this.links[i].id}`);
+          this.CalcularPeso( peso , NodoEntrante);
+          this.BuscarNodos( this.links[i].source, Number(this.links[i].label) );
+        }
+      }
+    }
+  }
+
+  CalcularPeso( Peso: number , Nodo: string ) {
+    // console.log('entro a calcular peso');
+    // console.log(this.NodosCop);
+    for (let j = 0; j < this.NodosCop.length; j++) {
+      // console.log('-------------------');
+      // console.log(this.NodosCop[j]['id']);
+      // console.log('------------------->');
+      // console.log(Nodo);
+      if ( this.NodosCop[j]['id'] === Nodo ) {
+        // console.log('encntro el noodo para calcular peso');
+        if ( Peso > this.NodosCop[j]['Peso'] ) {
+          this.NodosCop[j]['Peso'] += Peso;
+          console.log(`peso actual del nodo: ${Nodo} es ${this.NodosCop[j]['Peso']}`);
+        }
+      }
+    }
   }
 }

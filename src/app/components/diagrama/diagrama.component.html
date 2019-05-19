@@ -64,6 +64,21 @@
                     </svg:g>
                 </ng-template>
             </ngx-graph>
-        </div>
+        </div> <br>
+        <mat-form-field class="m-2">
+            <mat-label>Inicio de Ruta</mat-label>
+            <mat-select [(value)]="nodoInicio" [(ngModel)]="RutaInicio">
+                <mat-option>None</mat-option>
+                <mat-option *ngFor="let nodo of nodes" value="{{nodo['id']}}">{{nodo['id']}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-form-field class="m-2">
+            <mat-label>Final Ruta</mat-label>
+            <mat-select [(value)]="nodoDestino" [(ngModel)]="RutaFinal">
+                <mat-option>None</mat-option>
+                <mat-option *ngFor="let nodo of nodes" value="{{nodo['id']}}">{{nodo['id']}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <button type="button" class="btn btn-primary" (click)="BuscarRuta()">Buscar ruta</button><br>
     </mat-card>
 </div>
