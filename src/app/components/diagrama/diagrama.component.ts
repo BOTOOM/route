@@ -22,18 +22,21 @@ export class DiagramaComponent implements OnInit {
       label: 'A',
       Peso: 0,
     },
-    // {
-    //   id: 'B',
-    //   label: 'B'
-    // },
-    // {
-    //   id: 'C',
-    //   label: 'C'
-    // },
-    // {
-    //   id: 'D',
-    //   label: 'D'
-    // }
+    {
+      id: 'B',
+      label: 'B',
+      Peso: 0,
+    },
+    {
+      id: 'C',
+      label: 'C',
+      Peso: 0,
+    },
+    {
+      id: 'D',
+      label: 'D',
+      Peso: 0,
+    }
   ];
   // nodosNuevos: Node[] = [
   //   {
@@ -228,42 +231,46 @@ export class DiagramaComponent implements OnInit {
     for (let i = 0; i < this.links.length; i++) {
       if ( this.links[i].target === this.RutaFinal ) {
         console.log(`entro al link ${this.links[i].id}`);
-        this.BuscarNodos( this.links[i].source, Number(this.links[i].label) );
+        this.BuscarNodos( this.links[i].source, this.links[i].target , Number(this.links[i].label) );
       }
     }
   }
 
-  BuscarNodos(NodoEntrante: string, peso: number) {
+  BuscarNodos(NodoEntrante: string, NodoSalida: string , peso: number) {
     if (this.RutaInicio === NodoEntrante) {
       console.log('llegue al inicio de la ruta wiiii');
-      this.CalcularPeso( peso , NodoEntrante);
+      this.CalcularPeso( peso , NodoEntrante , NodoSalida);
     } else {
       console.log('bucando aun');
       for (let i = 0; i < this.links.length; i++) {
         if (this.links[i].target === NodoEntrante) {
           console.log(`entro al link ${this.links[i].id}`);
-          this.CalcularPeso( peso , NodoEntrante);
-          this.BuscarNodos( this.links[i].source, Number(this.links[i].label) );
+          this.CalcularPeso( peso , NodoEntrante , NodoSalida);
+          this.BuscarNodos( this.links[i].source, this.links[i].target , Number(this.links[i].label) );
         }
       }
     }
   }
 
-  CalcularPeso( Peso: number , Nodo: string ) {
+  CalcularPeso( Peso: number , NodoIzq: string , NodoDer ) {
     // console.log('entro a calcular peso');
-    // console.log(this.NodosCop);
-    for (let j = 0; j < this.NodosCop.length; j++) {
-      // console.log('-------------------');
-      // console.log(this.NodosCop[j]['id']);
-      // console.log('------------------->');
-      // console.log(Nodo);
-      if ( this.NodosCop[j]['id'] === Nodo ) {
-        // console.log('encntro el noodo para calcular peso');
-        if ( Peso > this.NodosCop[j]['Peso'] ) {
-          this.NodosCop[j]['Peso'] += Peso;
-          console.log(`peso actual del nodo: ${Nodo} es ${this.NodosCop[j]['Peso']}`);
+    for (let i = 0; i < this.NodosCop.length; i++) {
+      if ( this.NodosCop[i]['id'] === NodoDer ) {
+        for (let j = 0; j < this.NodosCop.length; j++) {
+          // console.log('-------------------');
+          // console.log(this.NodosCop[j]['id']);
+          // console.log('------------------->');
+          // console.log(Nodo);
+          if ( this.NodosCop[j]['id'] === NodoIzq ) {
+            // console.log('encntro el noodo para calcular peso');
+            if ( Peso > this.NodosCop[j]['Peso'] ) {
+              this.NodosCop[j]['Peso'] += Peso + this.NodosCop[i]['Peso'];
+              console.log(`peso actual del nodo: ${NodoIzq} es ${this.NodosCop[j]['Peso']}`);
+            }
+          }
         }
       }
     }
+    console.log(this.NodosCop);
   }
 }
