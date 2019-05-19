@@ -14,6 +14,42 @@ export class DiagramaComponent implements OnInit {
   pesoNodo: number;
   nodoInicio: string;
   nodoDestino: string;
+  RutaInicio: string;
+  RutaFinal: string;
+  Ruta: string;
+  NodosCop: any[] = [
+    {
+      id: 'A',
+      label: 'A',
+      Peso: 0,
+    },
+    {
+      id: 'B',
+      label: 'B',
+      Peso: 0,
+    },
+    {
+      id: 'G',
+      label: 'G',
+      Peso: 0,
+    },
+    {
+      id: 'D',
+      label: 'D',
+      Peso: 0,
+    }
+    ,
+    {
+      id: 'E',
+      label: 'E',
+      Peso: 0,
+    },
+    {
+      id: 'S',
+      label: 'S',
+      Peso: 0,
+    },
+  ];
   // nodosNuevos: Node[] = [
   //   {
   //     id: this.nombreNodo,
@@ -26,45 +62,86 @@ export class DiagramaComponent implements OnInit {
       id: 'A',
       label: 'A'
     },
-    // {
-    //   id: 'second',
-    //   label: 'B'
-    // },
-    // {
-    //   id: 'c1',
-    //   label: 'C1'
-    // }, {
-    //   id: 'c2',
-    //   label: 'C2'
-    // }
+    {
+      id: 'B',
+      label: 'B'
+    },
+    {
+      id: 'G',
+      label: 'G'
+    },
+    {
+      id: 'D',
+      label: 'D'
+    },
+    {
+      id: 'E',
+      label: 'E'
+    },
+    {
+      id: 'S',
+      label: 'S'
+    },
   ];
 
   links: Edge[]  = [
-    // {
-    //   id: 'a',
-    //   source: 'A',
-    //   target: 'A',
-    //   label: 'is parent of'
-    // },
-    // {
-    //   id: 'b',
-    //   source: 'first',
-    //   target: 'c1',
-    //   label: 'cosa 1'
-    // }, {
-    //   id: 'c',
-    //   source: 'c1',
-    //   target: 'first',
-    //   label: 'cosa 2'
-    // }, {
-    //   id: 'd',
-    //   source: 'first',
-    //   target: 'c2',
-    //   label: 'cosa 3'
-    // }
+    {
+      id: 'AB',
+      source: 'A',
+      target: 'B',
+      label: '2'
+    },
+    {
+      id: 'SA',
+      source: 'S',
+      target: 'A',
+      label: '6'
+    },
+    {
+      id: 'SB',
+      source: 'S',
+      target: 'B',
+      label: '1'
+    },
+    {
+      id: 'AD',
+      source: 'A',
+      target: 'D',
+      label: '4'
+    },
+    {
+      id: 'AE',
+      source: 'A',
+      target: 'E',
+      label: '1'
+    },
+    {
+      id: 'DE',
+      source: 'D',
+      target: 'E',
+      label: '2'
+    },
+    {
+      id: 'BE',
+      source: 'B',
+      target: 'E',
+      label: '20'
+    },
+    {
+      id: 'DG',
+      source: 'D',
+      target: 'G',
+      label: '5'
+    },
+    {
+      id: 'EG',
+      source: 'E',
+      target: 'G',
+      label: '10'
+    },
   ];
 
-  layout: String | Layout = 'dagreCluster';
+  layout: String | Layout = 'colaForceDirected';
   layouts: any[] = [
     {
       label: 'Dagre',
@@ -99,12 +176,12 @@ export class DiagramaComponent implements OnInit {
   maxZoomLevel = 4.0;
   panOnZoom = true;
 
-  autoZoom = true;
-  autoCenter = true;
+  autoZoom = false;
+  autoCenter = false;
 
   constructor() {
-    console.log(this.nodes);
-    console.log(this.links);
+    // console.log(this.nodes);
+    // console.log(this.links);
   }
 
   ngOnInit() {
@@ -170,7 +247,21 @@ export class DiagramaComponent implements OnInit {
         },
       }
     );
-    console.log(this.nodes);
+    this.NodosCop.push(
+      {
+        id: this.nombreNodo,
+        label: this.nombreNodo,
+        dimension: {
+          width: 30,
+          height: 30,
+        },
+        data: {
+          color: '#7aa3e5',
+        },
+        Peso: 0,
+      }
+    );
+    // console.log(this.nodes);
   }
 
   crearUnion() {
@@ -182,6 +273,105 @@ export class DiagramaComponent implements OnInit {
         target: `${this.nodoDestino}`,
       }
     );
-    console.log(this.links);
+    // console.log(this.links);
+  }
+
+  BuscarRuta() {
+    // console.log(this.RutaFinal);
+    for (let i = 0; i < this.links.length; i++) {
+      if ( this.links[i].target === this.RutaFinal ) {
+        // console.log(`entro al link ${this.links[i].id}`);
+        this.BuscarNodos( this.links[i].source, this.links[i].target , Number(this.links[i].label) );
+      }
+    }
+  }
+
+  BuscarNodos(NodoEntrante: string, NodoSalida: string , peso: number) {
+    if (this.RutaInicio === NodoEntrante) {
+      // console.log('llegue al inicio de la ruta wiiii');
+      this.CalcularPeso( peso , NodoEntrante , NodoSalida , true);
+    } else {
+      // console.log('bucando aun');
+      for (let i = 0; i < this.links.length; i++) {
+        if (this.links[i].target === NodoEntrante) {
+          // console.log(`entro al link ${this.links[i].id}`);
+          this.CalcularPeso( peso , NodoEntrante , NodoSalida);
+          this.BuscarNodos( this.links[i].source, this.links[i].target , Number(this.links[i].label) );
+        }
+      }
+    }
+  }
+
+  CalcularPeso( Peso: number , NodoIzq: string , NodoDer: string , finalRuta?: boolean) {
+    for (let i = 0; i < this.NodosCop.length; i++) {
+      if ( this.NodosCop[i]['id'] === NodoDer ) {
+        for (let j = 0; j < this.NodosCop.length; j++) {
+          if ( this.NodosCop[j]['id'] === NodoIzq ) {
+            const PesoSumado = Peso + this.NodosCop[i]['Peso'];
+            if ( PesoSumado > this.NodosCop[j]['Peso'] ) {
+              this.NodosCop[j]['Peso'] = PesoSumado;
+              // console.log(`peso actual del nodo: ${NodoIzq} es ${this.NodosCop[j]['Peso']}`);
+              if ( finalRuta ) {
+                this.CrearRuta(NodoIzq , this.NodosCop[j]['Peso'] , NodoIzq);
+              }
+            }
+          }
+        }
+      }
+    }
+    // console.log(this.NodosCop);
+  }
+
+  CrearRuta(NodoSource: string, pesoSource: number , RUTA: string) {
+    // console.log('entro a crear ruta');
+    // let ruta = '';
+    for (let i = 0; i < this.links.length; i++) {
+      if (this.links[i].source === NodoSource) {
+        for (let j = 0; j < this.NodosCop.length; j++) {
+          if (this.NodosCop[j]['id'] === this.links[i].target) {
+            const resta = pesoSource - Number(this.links[i].label);
+            if (resta === this.NodosCop[j]['Peso']) {
+              RUTA += ` > ${this.NodosCop[j]['id']}`;
+              this.Ruta = RUTA;
+              // console.log(RUTA);
+              this.CrearRuta(this.NodosCop[j]['id'] , this.NodosCop[j]['Peso'] , RUTA);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Limpiar() {
+    this.nodes = [
+      {
+        id: 'A',
+        label: 'A',
+        dimension: {
+          width: 30,
+          height: 30,
+        },
+        data: {
+          color: '#7aa3e5',
+        },
+      },
+    ];
+    this.NodosCop = [
+      {
+        id: 'A',
+        label: 'A',
+        dimension: {
+          width: 30,
+          height: 30,
+        },
+        data: {
+          color: '#7aa3e5',
+        },
+        Peso: 0,
+      },
+    ];
+
+    this.links = [];
+
   }
 }
