@@ -28,8 +28,8 @@ export class DiagramaComponent implements OnInit {
       Peso: 0,
     },
     {
-      id: 'C',
-      label: 'C',
+      id: 'G',
+      label: 'G',
       Peso: 0,
     },
     {
@@ -37,6 +37,17 @@ export class DiagramaComponent implements OnInit {
       label: 'D',
       Peso: 0,
     }
+    ,
+    {
+      id: 'E',
+      label: 'E',
+      Peso: 0,
+    },
+    {
+      id: 'S',
+      label: 'S',
+      Peso: 0,
+    },
   ];
   // nodosNuevos: Node[] = [
   //   {
@@ -55,13 +66,21 @@ export class DiagramaComponent implements OnInit {
       label: 'B'
     },
     {
-      id: 'C',
-      label: 'C'
+      id: 'G',
+      label: 'G'
     },
     {
       id: 'D',
       label: 'D'
-    }
+    },
+    {
+      id: 'E',
+      label: 'E'
+    },
+    {
+      id: 'S',
+      label: 'S'
+    },
   ];
 
   links: Edge[]  = [
@@ -69,29 +88,59 @@ export class DiagramaComponent implements OnInit {
       id: 'AB',
       source: 'A',
       target: 'B',
-      label: '9'
+      label: '2'
     },
     {
-      id: 'BC',
-      source: 'B',
-      target: 'C',
+      id: 'SA',
+      source: 'S',
+      target: 'A',
+      label: '6'
+    },
+    {
+      id: 'SB',
+      source: 'S',
+      target: 'B',
       label: '1'
     },
     {
-      id: 'DC',
-      source: 'D',
-      target: 'C',
+      id: 'AD',
+      source: 'A',
+      target: 'D',
       label: '4'
     },
-    // {
-    //   id: 'AD',
-    //   source: 'A',
-    //   target: 'D',
-    //   label: '7'
-    // }
+    {
+      id: 'AE',
+      source: 'A',
+      target: 'E',
+      label: '1'
+    },
+    {
+      id: 'DE',
+      source: 'D',
+      target: 'E',
+      label: '2'
+    },
+    {
+      id: 'BE',
+      source: 'B',
+      target: 'E',
+      label: '20'
+    },
+    {
+      id: 'DG',
+      source: 'D',
+      target: 'G',
+      label: '5'
+    },
+    {
+      id: 'EG',
+      source: 'E',
+      target: 'G',
+      label: '10'
+    },
   ];
 
-  layout: String | Layout = 'dagreCluster';
+  layout: String | Layout = 'colaForceDirected';
   layouts: any[] = [
     {
       label: 'Dagre',
@@ -126,8 +175,8 @@ export class DiagramaComponent implements OnInit {
   maxZoomLevel = 4.0;
   panOnZoom = true;
 
-  autoZoom = true;
-  autoCenter = true;
+  autoZoom = false;
+  autoCenter = false;
 
   constructor() {
     // console.log(this.nodes);
@@ -211,7 +260,7 @@ export class DiagramaComponent implements OnInit {
         Peso: 0,
       }
     );
-    console.log(this.nodes);
+    // console.log(this.nodes);
   }
 
   crearUnion() {
@@ -223,14 +272,14 @@ export class DiagramaComponent implements OnInit {
         target: `${this.nodoDestino}`,
       }
     );
-    console.log(this.links);
+    // console.log(this.links);
   }
 
   BuscarRuta() {
-    console.log(this.RutaFinal);
+    // console.log(this.RutaFinal);
     for (let i = 0; i < this.links.length; i++) {
       if ( this.links[i].target === this.RutaFinal ) {
-        console.log(`entro al link ${this.links[i].id}`);
+        // console.log(`entro al link ${this.links[i].id}`);
         this.BuscarNodos( this.links[i].source, this.links[i].target , Number(this.links[i].label) );
       }
     }
@@ -238,13 +287,13 @@ export class DiagramaComponent implements OnInit {
 
   BuscarNodos(NodoEntrante: string, NodoSalida: string , peso: number) {
     if (this.RutaInicio === NodoEntrante) {
-      console.log('llegue al inicio de la ruta wiiii');
+      // console.log('llegue al inicio de la ruta wiiii');
       this.CalcularPeso( peso , NodoEntrante , NodoSalida , true);
     } else {
-      console.log('bucando aun');
+      // console.log('bucando aun');
       for (let i = 0; i < this.links.length; i++) {
         if (this.links[i].target === NodoEntrante) {
-          console.log(`entro al link ${this.links[i].id}`);
+          // console.log(`entro al link ${this.links[i].id}`);
           this.CalcularPeso( peso , NodoEntrante , NodoSalida);
           this.BuscarNodos( this.links[i].source, this.links[i].target , Number(this.links[i].label) );
         }
@@ -257,9 +306,10 @@ export class DiagramaComponent implements OnInit {
       if ( this.NodosCop[i]['id'] === NodoDer ) {
         for (let j = 0; j < this.NodosCop.length; j++) {
           if ( this.NodosCop[j]['id'] === NodoIzq ) {
-            if ( Peso > this.NodosCop[j]['Peso'] ) {
-              this.NodosCop[j]['Peso'] += Peso + this.NodosCop[i]['Peso'];
-              console.log(`peso actual del nodo: ${NodoIzq} es ${this.NodosCop[j]['Peso']}`);
+            const PesoSumado = Peso + this.NodosCop[i]['Peso'];
+            if ( PesoSumado > this.NodosCop[j]['Peso'] ) {
+              this.NodosCop[j]['Peso'] = PesoSumado;
+              // console.log(`peso actual del nodo: ${NodoIzq} es ${this.NodosCop[j]['Peso']}`);
               if ( finalRuta ) {
                 this.CrearRuta();
               }
@@ -268,7 +318,7 @@ export class DiagramaComponent implements OnInit {
         }
       }
     }
-    console.log(this.NodosCop);
+    // console.log(this.NodosCop);
   }
 
   CrearRuta() {
