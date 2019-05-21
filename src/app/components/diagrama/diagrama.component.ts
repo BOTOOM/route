@@ -17,6 +17,7 @@ export class DiagramaComponent implements OnInit {
   RutaInicio: string;
   RutaFinal: string;
   Ruta: string;
+  CosteRuta: number;
   NodosCop: any[] = [
     {
       id: 'A',
@@ -251,17 +252,11 @@ export class DiagramaComponent implements OnInit {
       {
         id: this.nombreNodo,
         label: this.nombreNodo,
-        dimension: {
-          width: 30,
-          height: 30,
-        },
-        data: {
-          color: '#7aa3e5',
-        },
         Peso: 0,
       }
     );
     // console.log(this.nodes);
+    // console.log(this.NodosCop);
   }
 
   crearUnion() {
@@ -277,6 +272,8 @@ export class DiagramaComponent implements OnInit {
   }
 
   BuscarRuta() {
+    this.Ruta = '';
+    this.LimpiarRuta();
     // console.log(this.RutaFinal);
     for (let i = 0; i < this.links.length; i++) {
       if ( this.links[i].target === this.RutaFinal ) {
@@ -312,6 +309,9 @@ export class DiagramaComponent implements OnInit {
               this.NodosCop[j]['Peso'] = PesoSumado;
               // console.log(`peso actual del nodo: ${NodoIzq} es ${this.NodosCop[j]['Peso']}`);
               if ( finalRuta ) {
+                this.CosteRuta = this.NodosCop[j]['Peso'];
+                console.log(`peso mandado ${this.NodosCop[j]['Peso']}`);
+                console.log(`peso deseado a mostrar ${this.CosteRuta}`)
                 this.CrearRuta(NodoIzq , this.NodosCop[j]['Peso'] , NodoIzq);
               }
             }
@@ -373,5 +373,12 @@ export class DiagramaComponent implements OnInit {
 
     this.links = [];
 
+  }
+
+  LimpiarRuta() {
+
+    for (let i = 0; i < this.NodosCop.length; i++) {
+      this.NodosCop[i]['Peso'] = 0;
+    }
   }
 }
