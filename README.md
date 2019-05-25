@@ -1,11 +1,8 @@
 # Proyecto elaborado por :
 - Edwar Diaz Ruiz **Cod: 20141020004**
+- Daissi Bibiana Gonzalez Roldan **Cod: 20152020108**
 
-## En colaboracion de :
-- Carlos Arturo Obregon Ravelo **Cod: 20141020009**
----
-
-# Matriz
+# Route
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.3.
 
@@ -38,6 +35,6 @@ npm install -g angular-cli-ghpages
 npm i angular-cli-ghpages --save-dev
 
 
-ng build --prod --base-href "https://botoom.github.io/matriz/"
-npx angular-cli-ghpages --dir=dist/matriz
+ng build --prod --base-href "https://botoom.github.io/route/"
+npx angular-cli-ghpages --dir=dist/route
 
