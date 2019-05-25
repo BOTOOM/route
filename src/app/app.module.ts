@@ -19,6 +19,7 @@ import { HomeComponent } from './components/home/home.component';
 import { MatComponent } from './components/mat/mat.component';
 import { PlotComponent } from './components/plot/plot.component';
 import { DiagramaComponent } from './components/diagrama/diagrama.component';
+import { RouteLocalComponent } from './components/route-local/route-local.component';
 
 
 @NgModule({
@@ -29,6 +30,7 @@ import { DiagramaComponent } from './components/diagrama/diagrama.component';
     MatComponent,
     PlotComponent,
     DiagramaComponent,
+    RouteLocalComponent,
   ],
   imports: [
     BrowserModule,
