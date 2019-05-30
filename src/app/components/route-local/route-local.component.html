@@ -1,3 +1,47 @@
-<p>
-  route-local works!
-</p>
+<div class="col-12">
+  <mat-card>
+    <div class="row">
+      <div class="col-6">
+        ingresara texto o un archivo? <br>
+        <mat-form-field>
+          <mat-label>Seleccione una opcion</mat-label>
+          <mat-select [(value)]="modoIngresoSelect" [(ngModel)]="modoIngresoSelect">
+            <mat-option>None</mat-option>
+            <mat-option *ngFor="let modo of modoIngreso" value="{{ modo }}"> {{ modo }} </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="col-6">
+        sistema operativo usado para el trace route <br>
+        <mat-form-field>
+          <mat-label>Seleccione una opcion</mat-label>
+          <mat-select [(value)]="OS_select" [(ngModel)]="OS_select">
+            <mat-option>None</mat-option>
+            <mat-option *ngFor="let sistema of OS" value="{{ sistema }}"> {{ sistema }} </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </div>
+
+    <div *ngIf="modoIngresoSelect === 'texto plano'" class="row m-2">
+      <div class="col-12">
+        <div *ngIf="OS_select === undefined" class="alert alert-danger" role="alert">
+            Escoja un sistema operativo
+          </div>
+        <p *ngIf="OS_select === 'Windows'">
+          Copie y pegue el resultado de la ruta usando la consola de windows con el comnando <small>tracert</small>
+        </p> <br>
+        <p *ngIf="OS_select === 'Linux'">
+          Copie y pegue el resultado de la ruta usando la terminal de Linux con el comnando <small>traceroute</small>
+        </p> <br>
+
+        <mat-form-field class="col-12" *ngIf="OS_select !== undefined">
+          <textarea matInput cdkTextareaAutosize placeholder="Leave a comment" [(ngModel)]="texto_plano"></textarea>
+        </mat-form-field>
+        <br>
+        <button type="button" class="btn btn-primary" (click)="obtenerTraza()">Obtener trazado</button><br>
+      </div>
+
+    </div>
+  </mat-card>
+</div>
