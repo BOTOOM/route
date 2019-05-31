@@ -16,19 +16,20 @@ export class RouteLocalComponent implements OnInit {
   separacion = [];
   JsonTraza = [];
   error: any;
-
+  carga: boolean;
 
 
   constructor(
     private geoip: GeoipService,
   ) {
-    // this.obtenerGeo();
+    this.carga = false;
   }
 
   ngOnInit() {
   }
 
   obtenerTraza() {
+    this.carga = false;
     this.separacion = [];
     this.JsonTraza = [];
     this.separacion = this.texto_plano.split(/\n/);
@@ -36,7 +37,7 @@ export class RouteLocalComponent implements OnInit {
     for (let i = 0; i < this.separacion.length; i++) {
       this.separacion[i] = this.separacion[i].split(' ');
     }
-    console.log(this.separacion);
+    // console.log(this.separacion);
     if (this.OS_select === 'Linux') {
       this.CovertirJsonLinux();
     }
@@ -54,7 +55,7 @@ export class RouteLocalComponent implements OnInit {
         });
       // }
     }
-    console.log(this.JsonTraza);
+    // console.log(this.JsonTraza);
     this.obtenerGeo();
   }
 
@@ -76,7 +77,7 @@ export class RouteLocalComponent implements OnInit {
     }, (error_service) => {
       // console.log(error_service);
       this.error = error_service;
-      console.log(`la ip ${this.JsonTraza[i]['ip']} es privada`);
+      // console.log(`la ip ${this.JsonTraza[i]['ip']} es privada`);
       this.JsonTraza[i]['isp'] = '***';
         this.JsonTraza[i]['organizacion'] = '***';
         this.JsonTraza[i]['continente'] = '***';
@@ -89,7 +90,8 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['organizacion'] = '***';
     });
     }
-    console.log(this.JsonTraza)
+    // console.log(this.JsonTraza);
+    this.carga = true;
   }
 
 }
