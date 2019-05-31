@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule  } from '@angular/core';
 // imports de componentes como material
 import { ThemeModule } from './theme.module';
+import {HttpClientModule} from '@angular/common/http';
 
 // chart
 import { ChartsModule } from 'ng2-charts';
@@ -39,6 +40,7 @@ import { RouteLocalComponent } from './components/route-local/route-local.compon
     ChartsModule,
     NgxGraphModule,
     ReactiveFormsModule ,
+    HttpClientModule,
     ThemeModule.forRoot(),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
     BrowserAnimationsModule
