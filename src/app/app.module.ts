@@ -5,6 +5,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgModule  } from '@angular/core';
 // imports de componentes como material
 import { ThemeModule } from './theme.module';
+import {HttpClientModule} from '@angular/common/http';
 
 // chart
 import { ChartsModule } from 'ng2-charts';
@@ -19,6 +20,7 @@ import { HomeComponent } from './components/home/home.component';
 import { MatComponent } from './components/mat/mat.component';
 import { PlotComponent } from './components/plot/plot.component';
 import { DiagramaComponent } from './components/diagrama/diagrama.component';
+import { RouteLocalComponent } from './components/route-local/route-local.component';
 
 
 @NgModule({
@@ -29,6 +31,7 @@ import { DiagramaComponent } from './components/diagrama/diagrama.component';
     MatComponent,
     PlotComponent,
     DiagramaComponent,
+    RouteLocalComponent,
   ],
   imports: [
     BrowserModule,
@@ -37,6 +40,7 @@ import { DiagramaComponent } from './components/diagrama/diagrama.component';
     ChartsModule,
     NgxGraphModule,
     ReactiveFormsModule ,
+    HttpClientModule,
     ThemeModule.forRoot(),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
     BrowserAnimationsModule
