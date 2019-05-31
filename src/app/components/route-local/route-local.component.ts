@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { GeoipService } from '../../services/geoip.service';
 
 @Component({
   selector: 'app-route-local',
@@ -17,7 +18,11 @@ export class RouteLocalComponent implements OnInit {
 
 
 
-  constructor() { }
+  constructor(
+    private geoip: GeoipService,
+  ) {
+    this.obtenerGeo();
+  }
 
   ngOnInit() {
   }
@@ -49,6 +54,13 @@ export class RouteLocalComponent implements OnInit {
       // }
     }
     console.log(this.JsonTraza);
+  }
+
+  obtenerGeo() {
+    this.geoip.get('172.217.30.206')
+    .subscribe( dato => {
+      console.log(dato);
+    });
   }
 
 }
