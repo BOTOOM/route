@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient} from '@angular/common/http';
 // import { throwError } from 'rxjs';
 // import { HttpErrorResponse } from '@angular/common/http';
 // import { catchError } from 'rxjs/operators';
 
-const httpOptions = {
-  headers: new HttpHeaders({
-      'Accept': 'application/json',
-  }),
-};
+// const httpOptions = {
+//   headers: new HttpHeaders({
+//       'Accept': 'application/json',
+//   }),
+// };
 
 const api_key = '74b7d9f44b0b4bdd8418e39eefd94b74';
 const url = `https://api.ipgeolocation.io/ipgeo?apiKey=${api_key}&ip=`;
@@ -24,7 +24,7 @@ export class GeoipService {
     console.log('Geoip Service Listo');
    }
 
-  get(endpoint) {
+  get(endpoint: string) {
     return this.http.get(`${url}${endpoint}`);
   }
 

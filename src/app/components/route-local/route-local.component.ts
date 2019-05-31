@@ -15,13 +15,14 @@ export class RouteLocalComponent implements OnInit {
   texto_plano: string;
   separacion = [];
   JsonTraza = [];
+  error: any;
 
 
 
   constructor(
     private geoip: GeoipService,
   ) {
-    this.obtenerGeo();
+    // this.obtenerGeo();
   }
 
   ngOnInit() {
@@ -54,13 +55,41 @@ export class RouteLocalComponent implements OnInit {
       // }
     }
     console.log(this.JsonTraza);
+    this.obtenerGeo();
   }
 
   obtenerGeo() {
-    this.geoip.get('172.217.30.206')
-    .subscribe( dato => {
-      console.log(dato);
+
+    for (let i = 0; i < this.JsonTraza.length; i++) {
+      this.geoip.get(this.JsonTraza[i]['ip']).subscribe( dato => {
+      // console.log(dato);
+        this.JsonTraza[i]['isp'] = dato['isp'];
+        this.JsonTraza[i]['organizacion'] = dato['organization'];
+        this.JsonTraza[i]['continente'] = dato['continent_name'];
+        this.JsonTraza[i]['pais'] = dato['country_name'];
+        this.JsonTraza[i]['capital'] = dato['country_capital'];
+        this.JsonTraza[i]['ciudad'] = dato['city'];
+        this.JsonTraza[i]['distrito'] = dato['district'];
+        this.JsonTraza[i]['longitud'] = dato['longitude'];
+        this.JsonTraza[i]['latitud'] = dato['latitude'];
+        this.JsonTraza[i]['organizacion'] = dato['organization'];
+    }, (error_service) => {
+      // console.log(error_service);
+      this.error = error_service;
+      console.log(`la ip ${this.JsonTraza[i]['ip']} es privada`);
+      this.JsonTraza[i]['isp'] = '***';
+        this.JsonTraza[i]['organizacion'] = '***';
+        this.JsonTraza[i]['continente'] = '***';
+        this.JsonTraza[i]['pais'] = '***';
+        this.JsonTraza[i]['capital'] = '***';
+        this.JsonTraza[i]['ciudad'] = '***';
+        this.JsonTraza[i]['distrito'] = '***';
+        this.JsonTraza[i]['longitud'] = '***';
+        this.JsonTraza[i]['latitud'] = '***';
+        this.JsonTraza[i]['organizacion'] = '***';
     });
+    }
+    console.log(this.JsonTraza)
   }
 
 }
