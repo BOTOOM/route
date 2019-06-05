@@ -43,6 +43,25 @@
       </div>
 
     </div>
+
+    <div *ngIf="modoIngresoSelect === 'archivo de texto'" class="row m-2">
+      <div class="col-12">
+          <div *ngIf="OS_select === undefined" class="alert alert-danger" role="alert">
+              Escoja un sistema operativo
+            </div>
+          <p *ngIf="OS_select === 'Windows'">
+            cargue el archivo <small> .txt</small> con la traza de la ruta generada por el comando: <small>tracert</small>
+          </p> <br>
+          <p *ngIf="OS_select === 'Linux'">
+            cargue el archivo <small> .txt</small> con la traza de la ruta generada por el comando:  <small>traceroute</small>
+          </p> <br>
+
+          <div class="col-12" *ngIf="OS_select !== undefined">
+              <input placeholder="Favorite food" type='file' name='userFile' id='file' (change)="onFileSelect($event.target)">
+          </div>
+      </div>
+
+    </div>
   </mat-card> <br>
 
   <mat-card *ngIf="carga">
