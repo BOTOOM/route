@@ -13,6 +13,7 @@ export class RouteLocalComponent implements OnInit {
   OS = ['Windows', 'Linux'];
   modoIngreso = ['archivo de texto', 'texto plano'];
   texto_plano: string;
+  texto_obtenido: any;
   separacion = [];
   JsonTraza = [];
   error: any;
@@ -49,14 +50,14 @@ export class RouteLocalComponent implements OnInit {
   CovertirJsonLinux() {
     for (let indice = 1; indice < this.separacion.length; indice++) {
       // console.log(this.separacion[i].length);
-      // if( this.separacion[i].length === 14 ) {
+      if( this.separacion[indice].length > 7 ) {
         this.JsonTraza.push({
           salto: this.separacion[indice][1],
           nombre: this.separacion[indice][3],
           ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
           ms: this.separacion[indice][6],
         });
-      // }
+      }
     }
     console.log(this.JsonTraza);
     this.obtenerGeo();
@@ -89,6 +90,7 @@ export class RouteLocalComponent implements OnInit {
       }
     }
     console.log(this.JsonTraza);
+    this.obtenerGeo();
   }
 
   obtenerGeo() {
@@ -124,6 +126,24 @@ export class RouteLocalComponent implements OnInit {
     }
     // console.log(this.JsonTraza);
     this.carga = true;
+  }
+
+  onFileSelect(input: HTMLInputElement){
+    console.log(input);
+    const file: File = input.files[0];
+    const myReader = new FileReader();
+    myReader.readAsText(file);
+    myReader.onload = (e) => {
+      this.texto_obtenido = myReader.result;
+      this.texto_plano = this.texto_obtenido;
+      console.log(this.texto_plano);
+      this.obtenerTraza();
+  }
+  }
+
+  nuevafuncion (texto: string) {
+    console.log('no se');
+    console.log(texto);
   }
 
 }
