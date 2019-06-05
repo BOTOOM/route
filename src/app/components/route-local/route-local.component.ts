@@ -89,6 +89,7 @@ export class RouteLocalComponent implements OnInit {
       }
     }
     console.log(this.JsonTraza);
+    this.obtenerGeo();
   }
 
   obtenerGeo() {
