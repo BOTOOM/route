@@ -37,26 +37,58 @@ export class RouteLocalComponent implements OnInit {
     for (let i = 0; i < this.separacion.length; i++) {
       this.separacion[i] = this.separacion[i].split(' ');
     }
-    // console.log(this.separacion);
+    console.log(this.separacion);
     if (this.OS_select === 'Linux') {
       this.CovertirJsonLinux();
+    }
+    if (this.OS_select === 'Windows') {
+      this.ConvertirJsonWindows();
     }
   }
 
   CovertirJsonLinux() {
-    for (let i = 1; i < this.separacion.length; i++) {
+    for (let indice = 1; indice < this.separacion.length; indice++) {
       // console.log(this.separacion[i].length);
       // if( this.separacion[i].length === 14 ) {
         this.JsonTraza.push({
-          salto: this.separacion[i][1],
-          nombre: this.separacion[i][3],
-          ip: this.separacion[i][4].substring(1, this.separacion[i][4].length - 1),
-          ms: this.separacion[i][6],
+          salto: this.separacion[indice][1],
+          nombre: this.separacion[indice][3],
+          ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+          ms: this.separacion[indice][6],
         });
       // }
     }
-    // console.log(this.JsonTraza);
+    console.log(this.JsonTraza);
     this.obtenerGeo();
+  }
+
+  ConvertirJsonWindows() {
+    for (let indice = 0; indice < this.separacion.length; indice++) {
+      if (this.separacion[indice].length > 12) {
+        // console.log(this.separacion[indice]);
+        if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
+            // console.log(`el nombre del punto es ${this.separacion[indice][ this.separacion[ indice ].length - 3 ]}`);
+            this.JsonTraza.push({
+              salto: this.separacion[indice][2],
+              nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
+              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
+              .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
+              ms: this.separacion[indice][ this.separacion[ indice ].length - 6 ],
+            });
+        } else {
+          // console.log(`no hay nombre solo direccion: ${this.separacion[indice][ this.separacion[ indice ].length - 2 ]}`);
+          this.JsonTraza.push({
+            salto: this.separacion[indice][2],
+            nombre: '',
+            // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+            ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
+            ms: this.separacion[indice][ this.separacion[ indice ].length - 5 ],
+          });
+        }
+      }
+    }
+    console.log(this.JsonTraza);
   }
 
   obtenerGeo() {
