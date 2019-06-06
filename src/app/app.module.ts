@@ -7,6 +7,9 @@ import { NgModule  } from '@angular/core';
 import { ThemeModule } from './theme.module';
 import {HttpClientModule} from '@angular/common/http';
 
+// import api google maps
+import { AgmCoreModule } from '@agm/core';
+
 // chart
 import { ChartsModule } from 'ng2-charts';
 import { NgxGraphModule } from '@swimlane/ngx-graph';
@@ -42,6 +45,9 @@ import { RouteLocalComponent } from './components/route-local/route-local.compon
     ReactiveFormsModule ,
     HttpClientModule,
     ThemeModule.forRoot(),
+    AgmCoreModule.forRoot({
+      apiKey: 'AIzaSyBeh_MR7yO7QzliNFhgITYzGnn80Dn_q74'
+    }),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
     BrowserAnimationsModule
   ],
