@@ -96,19 +96,27 @@
           </table>
     </div> <br>
 
-    <agm-map
-    [latitude]="lat"
-    [longitude]="lng"
-    [zoom]="zoom"
-  [disableDefaultUI]="false">
-      <agm-marker
-     *ngFor="let make of markers"
-     [latitude]="make.lat"
-      [longitude]="make.lng"
-      [label]="make.label"
-      [markerDraggable]="make.draggable" >
-    </agm-marker>
-    </agm-map>
+    <div *ngIf="mapa">
+        <agm-map
+        [latitude]="lat"
+        [longitude]="lng"
+        [zoom]="zoom"
+      [disableDefaultUI]="false">
+          <agm-marker
+         *ngFor="let make of markers"
+         [latitude]="make.lat"
+          [longitude]="make.lng"
+          [label]="make.label"
+          [markerDraggable]="make.draggable" >
+        </agm-marker>
+        <agm-polyline *ngFor="let poli of polilinea">
+            <agm-polyline-point [latitude]="poli.latIni" [longitude]="poli.lngIni">
+            </agm-polyline-point>
+            <agm-polyline-point [latitude]="poli.latFin" [longitude]="poli.lngFin">
+            </agm-polyline-point>
+        </agm-polyline>
+        </agm-map>
+    </div>
     
   </mat-card> <br>
 

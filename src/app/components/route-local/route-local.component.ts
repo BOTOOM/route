@@ -18,16 +18,19 @@ export class RouteLocalComponent implements OnInit {
   JsonTraza = [];
   error: any;
   carga: boolean;
+  mapa: boolean;
   lat = 4.66774;
   lng = -74.13200;
   zoom = 2;
   markers: Marker[] = [];
+  polilinea: Poly[] = [];
 
 
   constructor(
     private geoip: GeoipService,
   ) {
     this.carga = false;
+    this.mapa = false;
   }
 
   ngOnInit() {
@@ -35,6 +38,7 @@ export class RouteLocalComponent implements OnInit {
 
   obtenerTraza() {
     this.carga = false;
+    this.mapa = false;
     this.separacion = [];
     this.JsonTraza = [];
     this.separacion = this.texto_plano.split(/\n/);
@@ -122,12 +126,10 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['longitud'] = dato['longitude'];
         this.JsonTraza[i]['latitud'] = dato['latitude'];
         this.JsonTraza[i]['organizacion'] = dato['organization'];
-        this.markers.push({
-          lat: Number(dato['latitude']),
-          lng: Number(dato['longitude']),
-          label: this.JsonTraza[i]['salto'],
-          draggable: false,
-        });
+        if (i === ( this.JsonTraza.length - 1 ) ) {
+          console.log(this.JsonTraza);
+          this.crearPuntos();
+        }
     }, (error_service) => {
       // console.log(error_service);
       this.error = error_service;
@@ -146,7 +148,41 @@ export class RouteLocalComponent implements OnInit {
     }
     // console.log(this.JsonTraza);
     this.carga = true;
-    console.log(this.markers);
+    // console.log(this.markers);
+  }
+
+  crearPuntos () {
+    for (let i = 0; i < this.JsonTraza.length; i++) {
+      if (this.JsonTraza[i]['longitud'] !== '***') {
+        this.markers.push({
+          lat: Number(this.JsonTraza[i]['latitud']),
+          lng: Number(this.JsonTraza[i]['longitud']),
+          label: this.JsonTraza[i]['salto'],
+          draggable: false,
+        });
+      }
+      if (i === ( this.JsonTraza.length - 1 ) ) {
+        console.log(this.markers);
+        this.CrearLineas();
+      }
+    }
+  }
+
+  CrearLineas () {
+    console.log('entra a creacion');
+    this.polilinea = [];
+    for (let i = 1; i < this.markers.length; i++) {
+      this.polilinea.push({
+        latIni: this.markers[i - 1].lat,
+        lngIni: this.markers[i - 1].lng,
+        latFin: this.markers[i].lat,
+        lngFin: this.markers[i].lng,
+      });
+      if ( i === ( this.markers.length - 1 ) ) {
+        console.log(this.polilinea);
+        this.mapa = true;
+      }
+    }
   }
 
   onFileSelect(input: HTMLInputElement) {
@@ -170,3 +206,10 @@ lng: number;
 label?: string;
 draggable: boolean;
 }
+
+interface Poly {
+  latIni: number;
+  lngIni: number;
+  latFin: number;
+  lngFin: number;
+  }
