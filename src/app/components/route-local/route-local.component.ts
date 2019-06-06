@@ -18,8 +18,10 @@ export class RouteLocalComponent implements OnInit {
   JsonTraza = [];
   error: any;
   carga: boolean;
-  lat: number = 4.66774;
-  lng: number = -74.13200;
+  lat = 4.66774;
+  lng = -74.13200;
+  zoom = 2;
+  markers: Marker[] = [];
 
 
   constructor(
@@ -120,6 +122,12 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['longitud'] = dato['longitude'];
         this.JsonTraza[i]['latitud'] = dato['latitude'];
         this.JsonTraza[i]['organizacion'] = dato['organization'];
+        this.markers.push({
+          lat: Number(dato['latitude']),
+          lng: Number(dato['longitude']),
+          label: this.JsonTraza[i]['salto'],
+          draggable: false,
+        });
     }, (error_service) => {
       // console.log(error_service);
       this.error = error_service;
@@ -138,6 +146,7 @@ export class RouteLocalComponent implements OnInit {
     }
     // console.log(this.JsonTraza);
     this.carga = true;
+    console.log(this.markers);
   }
 
   onFileSelect(input: HTMLInputElement) {
@@ -153,9 +162,11 @@ export class RouteLocalComponent implements OnInit {
   };
   }
 
-  nuevafuncion (texto: string) {
-    console.log('no se');
-    console.log(texto);
-  }
+}
 
+interface Marker {
+lat: number;
+lng: number;
+label?: string;
+draggable: boolean;
 }

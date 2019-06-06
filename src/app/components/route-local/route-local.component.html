@@ -94,12 +94,23 @@
               </tr>
             </tbody>
           </table>
-    </div>
+    </div> <br>
+
+    <agm-map
+    [latitude]="lat"
+    [longitude]="lng"
+    [zoom]="zoom"
+  [disableDefaultUI]="false">
+      <agm-marker
+     *ngFor="let make of markers"
+     [latitude]="make.lat"
+      [longitude]="make.lng"
+      [label]="make.label"
+      [markerDraggable]="make.draggable" >
+    </agm-marker>
+    </agm-map>
     
   </mat-card> <br>
 
-    <!-- <agm-map [latitude]="lat" [longitude]="lng">
-      <agm-marker [latitude]="lat" [longitude]="lng"></agm-marker>
-    </agm-map> -->
 
 </div>
