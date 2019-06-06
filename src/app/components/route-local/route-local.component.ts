@@ -67,27 +67,37 @@ export class RouteLocalComponent implements OnInit {
 
   ConvertirJsonWindows() {
     for (let indice = 0; indice < this.separacion.length; indice++) {
+      let NumSalto;
       if (this.separacion[indice].length > 12) {
+        if (this.separacion[indice][2] !== '') {
+          NumSalto = this.separacion[indice][2];
+        } else {
+          NumSalto = this.separacion[indice][1];
+        }
         // console.log(this.separacion[indice]);
         if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
             // console.log(`el nombre del punto es ${this.separacion[indice][ this.separacion[ indice ].length - 3 ]}`);
-            this.JsonTraza.push({
-              salto: this.separacion[indice][2],
-              nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
-              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
-              .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
-              ms: this.separacion[indice][ this.separacion[ indice ].length - 6 ],
-            });
+            if ( this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
+              this.JsonTraza.push({
+                salto: NumSalto,
+                nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
+                // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+                ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
+                .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
+                ms: this.separacion[indice][ this.separacion[ indice ].length - 6 ],
+              });
+            }
         } else {
           // console.log(`no hay nombre solo direccion: ${this.separacion[indice][ this.separacion[ indice ].length - 2 ]}`);
-          this.JsonTraza.push({
-            salto: this.separacion[indice][2],
-            nombre: '',
-            // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-            ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
-            ms: this.separacion[indice][ this.separacion[ indice ].length - 5 ],
-          });
+          if (this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
+            this.JsonTraza.push({
+              salto: NumSalto,
+              nombre: '',
+              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
+              ms: this.separacion[indice][ this.separacion[ indice ].length - 5 ],
+            });
+          }
         }
       }
     }
