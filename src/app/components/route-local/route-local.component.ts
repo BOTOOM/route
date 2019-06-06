@@ -18,6 +18,8 @@ export class RouteLocalComponent implements OnInit {
   JsonTraza = [];
   error: any;
   carga: boolean;
+  lat: number = 4.66774;
+  lng: number = -74.13200;
 
 
   constructor(
@@ -50,7 +52,7 @@ export class RouteLocalComponent implements OnInit {
   CovertirJsonLinux() {
     for (let indice = 1; indice < this.separacion.length; indice++) {
       // console.log(this.separacion[i].length);
-      if( this.separacion[indice].length > 7 ) {
+      if ( this.separacion[indice].length > 7 ) {
         this.JsonTraza.push({
           salto: this.separacion[indice][1],
           nombre: this.separacion[indice][3],
@@ -128,7 +130,7 @@ export class RouteLocalComponent implements OnInit {
     this.carga = true;
   }
 
-  onFileSelect(input: HTMLInputElement){
+  onFileSelect(input: HTMLInputElement) {
     console.log(input);
     const file: File = input.files[0];
     const myReader = new FileReader();
@@ -138,7 +140,7 @@ export class RouteLocalComponent implements OnInit {
       this.texto_plano = this.texto_obtenido;
       console.log(this.texto_plano);
       this.obtenerTraza();
-  }
+  };
   }
 
   nuevafuncion (texto: string) {
