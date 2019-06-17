@@ -18,12 +18,19 @@ export class RouteLocalComponent implements OnInit {
   JsonTraza = [];
   error: any;
   carga: boolean;
+  mapa: boolean;
+  lat = 4.66774;
+  lng = -74.13200;
+  zoom = 2;
+  markers: Marker[] = [];
+  polilinea: Poly[] = [];
 
 
   constructor(
     private geoip: GeoipService,
   ) {
     this.carga = false;
+    this.mapa = false;
   }
 
   ngOnInit() {
@@ -31,6 +38,7 @@ export class RouteLocalComponent implements OnInit {
 
   obtenerTraza() {
     this.carga = false;
+    this.mapa = false;
     this.separacion = [];
     this.JsonTraza = [];
     this.separacion = this.texto_plano.split(/\n/);
@@ -50,7 +58,7 @@ export class RouteLocalComponent implements OnInit {
   CovertirJsonLinux() {
     for (let indice = 1; indice < this.separacion.length; indice++) {
       // console.log(this.separacion[i].length);
-      if( this.separacion[indice].length > 7 ) {
+      if ( this.separacion[indice].length > 7 ) {
         this.JsonTraza.push({
           salto: this.separacion[indice][1],
           nombre: this.separacion[indice][3],
@@ -65,27 +73,37 @@ export class RouteLocalComponent implements OnInit {
 
   ConvertirJsonWindows() {
     for (let indice = 0; indice < this.separacion.length; indice++) {
+      let NumSalto;
       if (this.separacion[indice].length > 12) {
+        if (this.separacion[indice][2] !== '') {
+          NumSalto = this.separacion[indice][2];
+        } else {
+          NumSalto = this.separacion[indice][1];
+        }
         // console.log(this.separacion[indice]);
         if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
             // console.log(`el nombre del punto es ${this.separacion[indice][ this.separacion[ indice ].length - 3 ]}`);
-            this.JsonTraza.push({
-              salto: this.separacion[indice][2],
-              nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
-              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
-              .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
-              ms: this.separacion[indice][ this.separacion[ indice ].length - 6 ],
-            });
+            if ( this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
+              this.JsonTraza.push({
+                salto: NumSalto,
+                nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
+                // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+                ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
+                .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
+                ms: this.separacion[indice][ this.separacion[ indice ].length - 6 ],
+              });
+            }
         } else {
           // console.log(`no hay nombre solo direccion: ${this.separacion[indice][ this.separacion[ indice ].length - 2 ]}`);
-          this.JsonTraza.push({
-            salto: this.separacion[indice][2],
-            nombre: '',
-            // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-            ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
-            ms: this.separacion[indice][ this.separacion[ indice ].length - 5 ],
-          });
+          if (this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
+            this.JsonTraza.push({
+              salto: NumSalto,
+              nombre: '',
+              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
+              ms: this.separacion[indice][ this.separacion[ indice ].length - 5 ],
+            });
+          }
         }
       }
     }
@@ -108,6 +126,10 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['longitud'] = dato['longitude'];
         this.JsonTraza[i]['latitud'] = dato['latitude'];
         this.JsonTraza[i]['organizacion'] = dato['organization'];
+        if (i === ( this.JsonTraza.length - 1 ) ) {
+          console.log(this.JsonTraza);
+          this.crearPuntos();
+        }
     }, (error_service) => {
       // console.log(error_service);
       this.error = error_service;
@@ -126,9 +148,44 @@ export class RouteLocalComponent implements OnInit {
     }
     // console.log(this.JsonTraza);
     this.carga = true;
+    // console.log(this.markers);
   }
 
-  onFileSelect(input: HTMLInputElement){
+  crearPuntos () {
+    for (let i = 0; i < this.JsonTraza.length; i++) {
+      if (this.JsonTraza[i]['longitud'].length > 4) {
+        this.markers.push({
+          lat: Number(this.JsonTraza[i]['latitud']),
+          lng: Number(this.JsonTraza[i]['longitud']),
+          label: this.JsonTraza[i]['salto'],
+          draggable: false,
+        });
+      }
+      if (i === ( this.JsonTraza.length - 1 ) ) {
+        console.log(this.markers);
+        this.CrearLineas();
+      }
+    }
+  }
+
+  CrearLineas () {
+    console.log('entra a creacion');
+    this.polilinea = [];
+    for (let i = 1; i < this.markers.length; i++) {
+      this.polilinea.push({
+        latIni: this.markers[i - 1].lat,
+        lngIni: this.markers[i - 1].lng,
+        latFin: this.markers[i].lat,
+        lngFin: this.markers[i].lng,
+      });
+      if ( i === ( this.markers.length - 1 ) ) {
+        console.log(this.polilinea);
+        this.mapa = true;
+      }
+    }
+  }
+
+  onFileSelect(input: HTMLInputElement) {
     console.log(input);
     const file: File = input.files[0];
     const myReader = new FileReader();
@@ -138,12 +195,21 @@ export class RouteLocalComponent implements OnInit {
       this.texto_plano = this.texto_obtenido;
       console.log(this.texto_plano);
       this.obtenerTraza();
-  }
-  }
-
-  nuevafuncion (texto: string) {
-    console.log('no se');
-    console.log(texto);
+  };
   }
 
 }
+
+interface Marker {
+lat: number;
+lng: number;
+label?: string;
+draggable: boolean;
+}
+
+interface Poly {
+  latIni: number;
+  lngIni: number;
+  latFin: number;
+  lngFin: number;
+  }
