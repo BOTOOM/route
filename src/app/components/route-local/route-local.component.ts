@@ -31,6 +31,12 @@ export class RouteLocalComponent implements OnInit {
   ) {
     this.carga = false;
     this.mapa = false;
+    const cosa = Number("10");
+    console.log(cosa);
+    console.log(cosa.toString());
+    if (cosa.toString() === 'NaN') {
+      console.log('eso no era un numero');
+    }
   }
 
   ngOnInit() {
@@ -57,10 +63,16 @@ export class RouteLocalComponent implements OnInit {
 
   CovertirJsonLinux() {
     for (let indice = 1; indice < this.separacion.length; indice++) {
+      let NumSalto: number;
       // console.log(this.separacion[i].length);
       if ( this.separacion[indice].length > 7 ) {
+        for (let j = 0; j < 3; j++) {
+          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
+            NumSalto = this.separacion[indice][j];
+          }
+        }
         this.JsonTraza.push({
-          salto: this.separacion[indice][1],
+          salto: NumSalto,
           nombre: this.separacion[indice][3],
           ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
           ms: this.separacion[indice][6],
@@ -73,12 +85,12 @@ export class RouteLocalComponent implements OnInit {
 
   ConvertirJsonWindows() {
     for (let indice = 0; indice < this.separacion.length; indice++) {
-      let NumSalto;
+      let NumSalto: number;
       if (this.separacion[indice].length > 12) {
-        if (this.separacion[indice][2] !== '') {
-          NumSalto = this.separacion[indice][2];
-        } else {
-          NumSalto = this.separacion[indice][1];
+        for (let j = 0; j < 3; j++) {
+          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
+            NumSalto = this.separacion[indice][j];
+          }
         }
         // console.log(this.separacion[indice]);
         if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
@@ -153,7 +165,8 @@ export class RouteLocalComponent implements OnInit {
 
   crearPuntos () {
     for (let i = 0; i < this.JsonTraza.length; i++) {
-      if (this.JsonTraza[i]['longitud'].length > 4) {
+      // console.log(this.JsonTraza[i]);  Number(this.separacion[indice][j]).toString() !== 'NaN'
+      if (  Number(this.JsonTraza[i]['longitud']).toString() !== 'NaN') {
         this.markers.push({
           lat: Number(this.JsonTraza[i]['latitud']),
           lng: Number(this.JsonTraza[i]['longitud']),
