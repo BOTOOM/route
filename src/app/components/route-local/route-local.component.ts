@@ -153,7 +153,7 @@ export class RouteLocalComponent implements OnInit {
 
   crearPuntos () {
     for (let i = 0; i < this.JsonTraza.length; i++) {
-      if (this.JsonTraza[i]['longitud'] !== '***') {
+      if (this.JsonTraza[i]['longitud'].length > 4) {
         this.markers.push({
           lat: Number(this.JsonTraza[i]['latitud']),
           lng: Number(this.JsonTraza[i]['longitud']),
