@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { GeoipService } from '../../services/geoip.service';
+import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
+import { Label } from 'ng2-charts';
 
 @Component({
   selector: 'app-route-local',
@@ -24,6 +26,12 @@ export class RouteLocalComponent implements OnInit {
   zoom = 2;
   markers: Marker[] = [];
   polilinea: Poly[] = [];
+
+  barChartOptions: ChartOptions = {
+    responsive: true,
+    // We use these empty structures as placeholders for dynamic theming.
+    scales: { xAxes: [{}], yAxes: [{}] },
+  };
 
 
   constructor(
@@ -86,6 +94,7 @@ export class RouteLocalComponent implements OnInit {
   ConvertirJsonWindows() {
     for (let indice = 0; indice < this.separacion.length; indice++) {
       let NumSalto: number;
+      let Ms: string;
       if (this.separacion[indice].length > 12) {
         for (let j = 0; j < 3; j++) {
           if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
@@ -96,31 +105,41 @@ export class RouteLocalComponent implements OnInit {
         if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
             // console.log(`el nombre del punto es ${this.separacion[indice][ this.separacion[ indice ].length - 3 ]}`);
             if ( this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
+              if (this.separacion[indice][ this.separacion[ indice ].length - 6 ][0] === '<') {
+                Ms = this.separacion[indice][ this.separacion[ indice ].length - 6 ].substring(1);
+              } else {
+                Ms = this.separacion[indice][ this.separacion[ indice ].length - 6 ];
+              }
               this.JsonTraza.push({
                 salto: NumSalto,
                 nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
                 // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
                 ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
                 .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
-                ms: this.separacion[indice][ this.separacion[ indice ].length - 6 ],
+                ms: Number(Ms),
               });
             }
         } else {
           // console.log(`no hay nombre solo direccion: ${this.separacion[indice][ this.separacion[ indice ].length - 2 ]}`);
           if (this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
+            if (this.separacion[indice][ this.separacion[ indice ].length - 5 ][0] === '<') {
+              Ms = this.separacion[indice][ this.separacion[ indice ].length - 5 ].substring(1);
+            } else {
+              Ms = this.separacion[indice][ this.separacion[ indice ].length - 5 ];
+            }
             this.JsonTraza.push({
               salto: NumSalto,
               nombre: '',
               // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
               ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
-              ms: this.separacion[indice][ this.separacion[ indice ].length - 5 ],
+              ms: Number(Ms),
             });
           }
         }
       }
     }
     console.log(this.JsonTraza);
-    this.obtenerGeo();
+    // this.obtenerGeo();
   }
 
   obtenerGeo() {
