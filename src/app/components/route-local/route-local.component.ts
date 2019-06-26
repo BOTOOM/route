@@ -21,6 +21,7 @@ export class RouteLocalComponent implements OnInit {
   error: any;
   carga: boolean;
   mapa: boolean;
+  mostrarChart: boolean;
   lat = 4.66774;
   lng = -74.13200;
   zoom = 2;
@@ -47,6 +48,7 @@ export class RouteLocalComponent implements OnInit {
   ) {
     this.carga = false;
     this.mapa = false;
+    this.mostrarChart = false;
     const cosa = Number('10');
     console.log(cosa);
     console.log(cosa.toString());
@@ -97,6 +99,7 @@ export class RouteLocalComponent implements OnInit {
     }
     console.log(this.JsonTraza);
     this.obtenerGeo();
+    this.datosChart();
   }
 
   ConvertirJsonWindows() {
@@ -147,7 +150,8 @@ export class RouteLocalComponent implements OnInit {
       }
     }
     console.log(this.JsonTraza);
-    // this.obtenerGeo();
+    this.obtenerGeo();
+    this.datosChart();
   }
 
   obtenerGeo() {
@@ -168,7 +172,7 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['tipo'] = 1; // si es 1 es publica
         if (i === ( this.JsonTraza.length - 1 ) ) {
           console.log(this.JsonTraza);
-          this.crearPuntos();
+          // this.crearPuntos();
         }
     }, (error_service) => {
       // console.log(error_service);
@@ -243,6 +247,31 @@ export class RouteLocalComponent implements OnInit {
   // metodo para cambiar el tipo de chart
   public randomize(): void {
     this.barChartType = this.barChartType === 'bar' ? 'line' : 'bar';
+  }
+
+  datosChart () {
+    console.log('entra a los datos del chart');
+    // console.log(this.barChartData[0]);
+    this.barChartData[0].label = this.JsonTraza[this.JsonTraza.length - 1 ]['ip'];
+    this.mostrarChart = true;
+    this.barChartLabels = this.saltosChart();
+    this.barChartData[0].data = this.VelocidadSaltosChart();
+  }
+
+  // fuuncion para obtener los labels a colocar en el eje horizontal
+  saltosChart() {
+    let labelSaltos = [];
+    for (let i = 0; i < this.JsonTraza.length; i++) {
+      labelSaltos.push(this.JsonTraza[i]['salto']);
+    }
+   return labelSaltos;
+  }
+  VelocidadSaltosChart() {
+    let labelVelocidad = [];
+    for (let i = 0; i < this.JsonTraza.length; i++) {
+      labelVelocidad.push( Number(this.JsonTraza[i]['ms']));
+    }
+   return labelVelocidad;
   }
 
 }
