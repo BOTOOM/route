@@ -31,7 +31,7 @@ export class RouteLocalComponent implements OnInit {
   ) {
     this.carga = false;
     this.mapa = false;
-    const cosa = Number("10");
+    const cosa = Number('10');
     console.log(cosa);
     console.log(cosa.toString());
     if (cosa.toString() === 'NaN') {
@@ -138,6 +138,7 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['longitud'] = dato['longitude'];
         this.JsonTraza[i]['latitud'] = dato['latitude'];
         this.JsonTraza[i]['organizacion'] = dato['organization'];
+        this.JsonTraza[i]['tipo'] = 1; // si es 1 es publica
         if (i === ( this.JsonTraza.length - 1 ) ) {
           console.log(this.JsonTraza);
           this.crearPuntos();
@@ -156,6 +157,7 @@ export class RouteLocalComponent implements OnInit {
         this.JsonTraza[i]['longitud'] = '***';
         this.JsonTraza[i]['latitud'] = '***';
         this.JsonTraza[i]['organizacion'] = '***';
+        this.JsonTraza[i]['tipo'] = 0; // si es cero es privada
     });
     }
     // console.log(this.JsonTraza);
@@ -166,7 +168,7 @@ export class RouteLocalComponent implements OnInit {
   crearPuntos () {
     for (let i = 0; i < this.JsonTraza.length; i++) {
       // console.log(this.JsonTraza[i]);  Number(this.separacion[indice][j]).toString() !== 'NaN'
-      if (  Number(this.JsonTraza[i]['longitud']).toString() !== 'NaN') {
+      if (  this.JsonTraza[i]['tipo'] === 1) {
         this.markers.push({
           lat: Number(this.JsonTraza[i]['latitud']),
           lng: Number(this.JsonTraza[i]['longitud']),
