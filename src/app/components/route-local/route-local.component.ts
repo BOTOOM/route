@@ -32,13 +32,13 @@ export class RouteLocalComponent implements OnInit {
     // We use these empty structures as placeholders for dynamic theming.
     scales: { xAxes: [{}], yAxes: [{}] },
   };
-  barChartLabels: Label[] = ['2006', '2007', '2008', '2009', '2010', '2011', '2012'];
-  barChartType: ChartType = 'bar';
+  barChartLabels: Label[] = [];
+  barChartType: ChartType = 'line';
   barChartLegend = true;
 
   public barChartData: ChartDataSets[] = [
-    { data: [65, 59, 80, 81, 56, 55, 40], label: 'Series A' },
-    { data: [28, 48, 40, 19, 86, 27, 90], label: 'Series B' }
+    { data: [], label: '' },
+    // { data: [28, 48, 40, 19, 86, 27, 90], label: 'Series B' }
   ];
 
 
