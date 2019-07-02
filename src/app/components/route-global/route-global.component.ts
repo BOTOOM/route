@@ -4,11 +4,11 @@ import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import { Label } from 'ng2-charts';
 
 @Component({
-  selector: 'app-route-local',
-  templateUrl: './route-local.component.html',
-  styleUrls: ['./route-local.component.css']
+  selector: 'app-route-global',
+  templateUrl: './route-global.component.html',
+  styleUrls: ['./route-global.component.css']
 })
-export class RouteLocalComponent implements OnInit {
+export class RouteGlobalComponent implements OnInit {
 
   modoIngresoSelect: string;
   OS_select: string;
