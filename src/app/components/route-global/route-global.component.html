@@ -1,26 +1,13 @@
 <div class="col-12">
   <mat-card>
     <div class="row">
-      <div class="col-6">
-        servidor? <br>
-        <mat-form-field>
-          <mat-label>Seleccione una opcion</mat-label>
-          <mat-select [(value)]="modoIngresoSelect" [(ngModel)]="modoIngresoSelect">
-            <mat-option>None</mat-option>
-            <mat-option *ngFor="let modo of modoIngreso" value="{{ modo }}"> {{ modo }} </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-      <div class="col-6">
-        sistema operativo usado para el trace route <br>
-        <mat-form-field>
-          <mat-label>Seleccione una opcion</mat-label>
-          <mat-select [(value)]="OS_select" [(ngModel)]="OS_select">
-            <mat-option>None</mat-option>
-            <mat-option *ngFor="let sistema of OS" value="{{ sistema }}"> {{ sistema }} </mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
+      <mat-tab-group>
+        <mat-tab *ngFor="let servidor of servidores" label="{{servidor}}">
+            <mat-form-field class="col-12" >
+              <textarea matInput cdkTextareaAutosize placeholder="Copie y pegue la ruta" [(ngModel)]="texto_plano"></textarea>
+            </mat-form-field>
+        </mat-tab>
+      </mat-tab-group>      
     </div>
 
     <div *ngIf="modoIngresoSelect === 'texto plano'" class="row m-2">

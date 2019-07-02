@@ -14,6 +14,7 @@ export class RouteGlobalComponent implements OnInit {
   OS_select: string;
   OS = ['Windows', 'Linux'];
   modoIngreso = ['archivo de texto', 'texto plano'];
+  servidores = ['Armerica', 'Europa', 'Asia', 'Oceania'];
   texto_plano: string;
   texto_obtenido: any;
   separacion = [];
