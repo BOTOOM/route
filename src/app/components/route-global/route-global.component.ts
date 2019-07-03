@@ -62,9 +62,25 @@ export class RouteGlobalComponent implements OnInit {
   ngOnInit() {
   }
 
-  sitioAmerica() {
-    const url = `http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl?target=${this.IpDestino}&function=traceroute`;
-    window.open( url, '_blank');
+  sitioAmerica(servidor: string) {
+  const UrlAmerica = `http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl?target=${this.IpDestino}&function=traceroute`;
+  const UrlEuropa = `http://www.macomnet.net/testlab/cgi-bin/nph-trace?${this.IpDestino}`;
+  const UrlAsia = `http://as9371.bgp4.jp/lg.cgi?query=34&arg=${this.IpDestino}`;
+  const UrlOceania = `http://www.hafey.org/cgi-bin/bgplg?cmd=traceroute&req=${this.IpDestino}`;
+
+    if (servidor === 'Armerica') {
+    window.open( UrlAmerica, '_blank');
+    }
+    if (servidor === 'Europa') {
+      window.open( UrlEuropa, '_blank');
+    }
+    if (servidor === 'Asia') {
+      window.open( UrlAsia, '_blank');
+    }
+    if (servidor === 'Oceania') {
+      window.open( UrlOceania, '_blank');
+    }
+
   }
 
   obtenerTraza(servidor: string) {

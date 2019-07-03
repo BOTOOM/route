@@ -4,12 +4,12 @@
       <mat-tab-group class="col-12">
         <mat-tab *ngFor="let servidor of servidores" label="{{servidor}}">
           <br>
-          <div class="m-3" *ngIf="servidor === 'Armerica'">
+          <div class="m-3">
             <p>Ingrese el lugar al cual desea realizar la ruta</p>
             <mat-form-field>
                 <input matInput placeholder="IP o Nombre del dominio" type="text" [(ngModel)]="IpDestino">
             </mat-form-field>
-            <button class="m-3" type="button" class="btn btn-primary m-3" (click)="sitioAmerica()">Realizar ruta</button><br>
+            <button class="m-3" type="button" class="btn btn-primary m-3" (click)="sitioAmerica(servidor)">Realizar ruta</button><br>
           </div>
           <br>
             <mat-form-field class="col-12" >
@@ -18,17 +18,6 @@
             <button class="m-3" type="button" class="btn btn-primary m-3" (click)="obtenerTraza(servidor)">Obtener trazado</button><br>
         </mat-tab>
       </mat-tab-group> <br>    
-    </div>
-    <div *ngIf="modoIngresoSelect === 'texto plano'" class="row m-2">
-      <div class="col-12">
-
-        <mat-form-field class="col-12" *ngIf="OS_select !== undefined">
-          <textarea matInput cdkTextareaAutosize placeholder="Leave a comment" [(ngModel)]="texto_plano"></textarea>
-        </mat-form-field>
-        <br>
-        <button type="button" class="btn btn-primary" (click)="obtenerTraza()">Obtener trazado</button><br>
-      </div>
-
     </div>
 
   </mat-card> <br>
