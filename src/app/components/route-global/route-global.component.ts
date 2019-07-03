@@ -11,7 +11,7 @@ import { Label } from 'ng2-charts';
 export class RouteGlobalComponent implements OnInit {
 
   modoIngresoSelect: string;
-  OS_select: string;
+  OS_select = 'Linux';
   OS = ['Windows', 'Linux'];
   modoIngreso = ['archivo de texto', 'texto plano'];
   servidores = ['Armerica', 'Europa', 'Asia', 'Oceania'];
@@ -28,6 +28,7 @@ export class RouteGlobalComponent implements OnInit {
   zoom = 2;
   markers: Marker[] = [];
   polilinea: Poly[] = [];
+  IpDestino: string;
 
   barChartOptions: ChartOptions = {
     responsive: true,
@@ -61,7 +62,13 @@ export class RouteGlobalComponent implements OnInit {
   ngOnInit() {
   }
 
-  obtenerTraza() {
+  sitioAmerica() {
+    const url = `http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl?target=${this.IpDestino}&function=traceroute`;
+    window.open( url, '_blank');
+  }
+
+  obtenerTraza(servidor: string) {
+    console.log(servidor);
     this.carga = false;
     this.mapa = false;
     this.separacion = [];
@@ -72,6 +79,9 @@ export class RouteGlobalComponent implements OnInit {
       this.separacion[i] = this.separacion[i].split(' ');
     }
     console.log(this.separacion);
+    if (servidor === 'Armerica') {
+      this.CovertirJsonLinux();
+    }
     if (this.OS_select === 'Linux') {
       this.CovertirJsonLinux();
     }
@@ -173,7 +183,7 @@ export class RouteGlobalComponent implements OnInit {
         this.JsonTraza[i]['tipo'] = 1; // si es 1 es publica
         if (i === ( this.JsonTraza.length - 1 ) ) {
           console.log(this.JsonTraza);
-          this.crearPuntos();
+          // this.crearPuntos();
         }
     }, (error_service) => {
       // console.log(error_service);
@@ -241,7 +251,7 @@ export class RouteGlobalComponent implements OnInit {
       this.texto_obtenido = myReader.result;
       this.texto_plano = this.texto_obtenido;
       console.log(this.texto_plano);
-      this.obtenerTraza();
+      this.obtenerTraza('');
   };
   }
 
@@ -273,6 +283,10 @@ export class RouteGlobalComponent implements OnInit {
       labelVelocidad.push( Number(this.JsonTraza[i]['ms']));
     }
    return labelVelocidad;
+  }
+
+  test_tab() {
+    console.log('entro');
   }
 
 }

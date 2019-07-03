@@ -1,26 +1,26 @@
 <div class="col-12">
   <mat-card>
     <div class="row">
-      <mat-tab-group>
+      <mat-tab-group class="col-12">
         <mat-tab *ngFor="let servidor of servidores" label="{{servidor}}">
+          <br>
+          <div class="m-3" *ngIf="servidor === 'Armerica'">
+            <p>Ingrese el lugar al cual desea realizar la ruta</p>
+            <mat-form-field>
+                <input matInput placeholder="IP o Nombre del dominio" type="text" [(ngModel)]="IpDestino">
+            </mat-form-field>
+            <button class="m-3" type="button" class="btn btn-primary m-3" (click)="sitioAmerica()">Realizar ruta</button><br>
+          </div>
+          <br>
             <mat-form-field class="col-12" >
               <textarea matInput cdkTextareaAutosize placeholder="Copie y pegue la ruta" [(ngModel)]="texto_plano"></textarea>
-            </mat-form-field>
+            </mat-form-field> <br>
+            <button class="m-3" type="button" class="btn btn-primary m-3" (click)="obtenerTraza(servidor)">Obtener trazado</button><br>
         </mat-tab>
-      </mat-tab-group>      
+      </mat-tab-group> <br>    
     </div>
-
     <div *ngIf="modoIngresoSelect === 'texto plano'" class="row m-2">
       <div class="col-12">
-        <div *ngIf="OS_select === undefined" class="alert alert-danger" role="alert">
-            Escoja un sistema operativo
-          </div>
-        <p *ngIf="OS_select === 'Windows'">
-          Copie y pegue el resultado de la ruta usando la consola de windows con el comnando <small>tracert</small>
-        </p> <br>
-        <p *ngIf="OS_select === 'Linux'">
-          Copie y pegue el resultado de la ruta usando la terminal de Linux con el comnando <small>traceroute</small>
-        </p> <br>
 
         <mat-form-field class="col-12" *ngIf="OS_select !== undefined">
           <textarea matInput cdkTextareaAutosize placeholder="Leave a comment" [(ngModel)]="texto_plano"></textarea>
@@ -31,24 +31,6 @@
 
     </div>
 
-    <div *ngIf="modoIngresoSelect === 'archivo de texto'" class="row m-2">
-      <div class="col-12">
-          <div *ngIf="OS_select === undefined" class="alert alert-danger" role="alert">
-              Escoja un sistema operativo
-            </div>
-          <p *ngIf="OS_select === 'Windows'">
-            cargue el archivo <small> .txt</small> con la traza de la ruta generada por el comando: <small>tracert</small>
-          </p> <br>
-          <p *ngIf="OS_select === 'Linux'">
-            cargue el archivo <small> .txt</small> con la traza de la ruta generada por el comando:  <small>traceroute</small>
-          </p> <br>
-
-          <div class="col-12" *ngIf="OS_select !== undefined">
-              <input placeholder="Favorite food" type='file' name='userFile' id='file' (change)="onFileSelect($event.target)">
-          </div>
-      </div>
-
-    </div>
   </mat-card> <br>
 
   <mat-card *ngIf="carga">
