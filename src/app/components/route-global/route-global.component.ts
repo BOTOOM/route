@@ -217,8 +217,9 @@ export class RouteGlobalComponent implements OnInit {
         this.JsonTraza[i]['organizacion'] = dato['organization'];
         this.JsonTraza[i]['tipo'] = 1; // si es 1 es publica
         if (i === ( this.JsonTraza.length - 1 ) ) {
+          console.log('termina el geo');
           console.log(this.JsonTraza);
-          // this.crearPuntos();
+          this.crearPuntos();
         }
     }, (error_service) => {
       // console.log(error_service);
@@ -243,6 +244,7 @@ export class RouteGlobalComponent implements OnInit {
   }
 
   crearPuntos () {
+    console.log('entra a puntos');
     for (let i = 0; i < this.JsonTraza.length; i++) {
       // console.log(this.JsonTraza[i]);  Number(this.separacion[indice][j]).toString() !== 'NaN'
       if (  this.JsonTraza[i]['tipo'] === 1) {
@@ -293,14 +295,14 @@ export class RouteGlobalComponent implements OnInit {
 
   // fuuncion para obtener los labels a colocar en el eje horizontal
   saltosChart() {
-    let labelSaltos = [];
+    const labelSaltos = [];
     for (let i = 0; i < this.JsonTraza.length; i++) {
       labelSaltos.push(this.JsonTraza[i]['salto']);
     }
    return labelSaltos;
   }
   VelocidadSaltosChart() {
-    let labelVelocidad = [];
+    const labelVelocidad = [];
     for (let i = 0; i < this.JsonTraza.length; i++) {
       labelVelocidad.push( Number(this.JsonTraza[i]['ms']));
     }
