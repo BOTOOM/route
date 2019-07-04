@@ -95,8 +95,11 @@ export class RouteGlobalComponent implements OnInit {
       this.separacion[i] = this.separacion[i].split(' ');
     }
     console.log(this.separacion);
-    if (servidor === 'America') {
+    if ((servidor === 'America') || (servidor === 'Europa') ) {
       this.CovertirJsonAmerica();
+    }
+    if (servidor === 'Oceania') {
+      this.CovertirJsonOceania();
     }
     // if (this.OS_select === 'Linux') {
     //   this.CovertirJsonLinux();
@@ -128,6 +131,39 @@ export class RouteGlobalComponent implements OnInit {
           nombre: Nombre,
           ip: IP,
           ms: this.separacion[indice][ this.separacion[indice].length - 2 ],
+        });
+      }
+    }
+    console.log(this.JsonTraza);
+    this.obtenerGeo();
+    this.datosChart();
+  }
+
+  CovertirJsonOceania() {
+    for (let indice = 0; indice < this.separacion.length; indice++) {
+      let NumSalto: number;
+      let Nombre: string;
+      let IP: string;
+      // console.log(this.separacion[i].length);
+      console.log('json oceania');
+      if ( this.separacion[indice].length > 7 ) {
+        for (let j = 0; j < 3; j++) {
+          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
+            NumSalto = this.separacion[indice][j];
+          }
+        }
+        if (NumSalto < 2) {
+          Nombre = this.separacion[indice][2];
+          IP = this.separacion[indice][3].substring(1, this.separacion[indice][3].length - 1);
+        } else {
+          Nombre = this.separacion[indice][3];
+          IP = this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1);
+        }
+        this.JsonTraza.push({
+          salto: NumSalto,
+          nombre: Nombre,
+          ip: IP,
+          ms: this.separacion[indice][ this.separacion[indice].length - 5 ],
         });
       }
     }
