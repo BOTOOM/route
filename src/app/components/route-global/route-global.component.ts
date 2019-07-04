@@ -14,7 +14,7 @@ export class RouteGlobalComponent implements OnInit {
   OS_select = 'Linux';
   OS = ['Windows', 'Linux'];
   modoIngreso = ['archivo de texto', 'texto plano'];
-  servidores = ['Armerica', 'Europa', 'Asia', 'Oceania'];
+  servidores = ['America', 'Europa', 'Asia', 'Oceania'];
   texto_plano: string;
   texto_obtenido: any;
   separacion = [];
@@ -68,7 +68,7 @@ export class RouteGlobalComponent implements OnInit {
   const UrlAsia = `http://as9371.bgp4.jp/lg.cgi?query=34&arg=${this.IpDestino}`;
   const UrlOceania = `http://www.hafey.org/cgi-bin/bgplg?cmd=traceroute&req=${this.IpDestino}`;
 
-    if (servidor === 'Armerica') {
+    if (servidor === 'America') {
     window.open( UrlAmerica, '_blank');
     }
     if (servidor === 'Europa') {
@@ -95,7 +95,7 @@ export class RouteGlobalComponent implements OnInit {
       this.separacion[i] = this.separacion[i].split(' ');
     }
     console.log(this.separacion);
-    if (servidor === 'Armerica') {
+    if (servidor === 'America') {
       this.CovertirJsonLinux();
     }
     if (this.OS_select === 'Linux') {

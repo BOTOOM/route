@@ -12,6 +12,12 @@
             <button class="m-3" type="button" class="btn btn-primary m-3" (click)="sitioAmerica(servidor)">Realizar ruta</button><br>
           </div>
           <br>
+          <div>
+            <br>
+            <h4>Seleciones como se muestra en la imagen la traza, copiela y peguela en la caja de texto de abajo</h4>
+            <img src="assets/img/{{servidor}}.png" alt="">
+          </div>
+          <br>
             <mat-form-field class="col-12" >
               <textarea matInput cdkTextareaAutosize placeholder="Copie y pegue la ruta" [(ngModel)]="texto_plano"></textarea>
             </mat-form-field> <br>
