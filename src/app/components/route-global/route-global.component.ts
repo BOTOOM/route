@@ -96,14 +96,44 @@ export class RouteGlobalComponent implements OnInit {
     }
     console.log(this.separacion);
     if (servidor === 'America') {
-      this.CovertirJsonLinux();
+      this.CovertirJsonAmerica();
     }
-    if (this.OS_select === 'Linux') {
-      this.CovertirJsonLinux();
+    // if (this.OS_select === 'Linux') {
+    //   this.CovertirJsonLinux();
+    // }
+  }
+
+  CovertirJsonAmerica() {
+    for (let indice = 1; indice < this.separacion.length - 1; indice++) {
+      let NumSalto: number;
+      let Nombre: string;
+      let IP: string;
+      // console.log(this.separacion[i].length);
+      console.log('json america');
+      if ( this.separacion[indice].length > 7 ) {
+        for (let j = 0; j < 3; j++) {
+          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
+            NumSalto = this.separacion[indice][j];
+          }
+        }
+        if (NumSalto > 9) {
+          Nombre = this.separacion[indice][2];
+          IP = this.separacion[indice][3].substring(1, this.separacion[indice][3].length - 1);
+        } else {
+          Nombre = this.separacion[indice][3];
+          IP = this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1);
+        }
+        this.JsonTraza.push({
+          salto: NumSalto,
+          nombre: Nombre,
+          ip: IP,
+          ms: this.separacion[indice][ this.separacion[indice].length - 2 ],
+        });
+      }
     }
-    if (this.OS_select === 'Windows') {
-      this.ConvertirJsonWindows();
-    }
+    console.log(this.JsonTraza);
+    this.obtenerGeo();
+    this.datosChart();
   }
 
   CovertirJsonLinux() {
@@ -122,58 +152,6 @@ export class RouteGlobalComponent implements OnInit {
           ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
           ms: this.separacion[indice][6],
         });
-      }
-    }
-    console.log(this.JsonTraza);
-    this.obtenerGeo();
-    this.datosChart();
-  }
-
-  ConvertirJsonWindows() {
-    for (let indice = 0; indice < this.separacion.length; indice++) {
-      let NumSalto: number;
-      let Ms: string;
-      if (this.separacion[indice].length > 12) {
-        for (let j = 0; j < 3; j++) {
-          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
-            NumSalto = this.separacion[indice][j];
-          }
-        }
-        // console.log(this.separacion[indice]);
-        if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
-            // console.log(`el nombre del punto es ${this.separacion[indice][ this.separacion[ indice ].length - 3 ]}`);
-            if ( this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
-              if (this.separacion[indice][ this.separacion[ indice ].length - 6 ][0] === '<') {
-                Ms = this.separacion[indice][ this.separacion[ indice ].length - 6 ].substring(1);
-              } else {
-                Ms = this.separacion[indice][ this.separacion[ indice ].length - 6 ];
-              }
-              this.JsonTraza.push({
-                salto: NumSalto,
-                nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
-                // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-                ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
-                .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
-                ms: Number(Ms),
-              });
-            }
-        } else {
-          // console.log(`no hay nombre solo direccion: ${this.separacion[indice][ this.separacion[ indice ].length - 2 ]}`);
-          if (this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
-            if (this.separacion[indice][ this.separacion[ indice ].length - 5 ][0] === '<') {
-              Ms = this.separacion[indice][ this.separacion[ indice ].length - 5 ].substring(1);
-            } else {
-              Ms = this.separacion[indice][ this.separacion[ indice ].length - 5 ];
-            }
-            this.JsonTraza.push({
-              salto: NumSalto,
-              nombre: '',
-              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
-              ms: Number(Ms),
-            });
-          }
-        }
       }
     }
     console.log(this.JsonTraza);
