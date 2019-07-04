@@ -101,6 +101,9 @@ export class RouteGlobalComponent implements OnInit {
     if (servidor === 'Oceania') {
       this.CovertirJsonOceania();
     }
+    if (servidor === 'Asia') {
+      this.CovertirJsonLinux();
+    }
     // if (this.OS_select === 'Linux') {
     //   this.CovertirJsonLinux();
     // }
@@ -152,7 +155,7 @@ export class RouteGlobalComponent implements OnInit {
             NumSalto = this.separacion[indice][j];
           }
         }
-        if (NumSalto < 2) {
+        if ( (NumSalto < 2) || (NumSalto > 9) ) {
           Nombre = this.separacion[indice][2];
           IP = this.separacion[indice][3].substring(1, this.separacion[indice][3].length - 1);
         } else {
@@ -182,12 +185,14 @@ export class RouteGlobalComponent implements OnInit {
             NumSalto = this.separacion[indice][j];
           }
         }
-        this.JsonTraza.push({
-          salto: NumSalto,
-          nombre: this.separacion[indice][3],
-          ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-          ms: this.separacion[indice][6],
-        });
+        if (NumSalto !== undefined) {
+          this.JsonTraza.push({
+            salto: NumSalto,
+            nombre: this.separacion[indice][3],
+            ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+            ms: this.separacion[indice][6],
+          });
+        }
       }
     }
     console.log(this.JsonTraza);
@@ -272,19 +277,6 @@ export class RouteGlobalComponent implements OnInit {
     }
   }
 
-  onFileSelect(input: HTMLInputElement) {
-    console.log(input);
-    const file: File = input.files[0];
-    const myReader = new FileReader();
-    myReader.readAsText(file);
-    myReader.onload = (e) => {
-      this.texto_obtenido = myReader.result;
-      this.texto_plano = this.texto_obtenido;
-      console.log(this.texto_plano);
-      this.obtenerTraza('');
-  };
-  }
-
   // metodo para cambiar el tipo de chart
   public randomize(): void {
     this.barChartType = this.barChartType === 'bar' ? 'line' : 'bar';
@@ -313,10 +305,6 @@ export class RouteGlobalComponent implements OnInit {
       labelVelocidad.push( Number(this.JsonTraza[i]['ms']));
     }
    return labelVelocidad;
-  }
-
-  test_tab() {
-    console.log('entro');
   }
 
 }
