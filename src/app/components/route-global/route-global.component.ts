@@ -11,9 +11,10 @@ import { Label } from 'ng2-charts';
 export class RouteGlobalComponent implements OnInit {
 
   modoIngresoSelect: string;
-  OS_select: string;
+  OS_select = 'Linux';
   OS = ['Windows', 'Linux'];
   modoIngreso = ['archivo de texto', 'texto plano'];
+  servidores = ['America', 'Europa', 'Asia', 'Oceania'];
   texto_plano: string;
   texto_obtenido: any;
   separacion = [];
@@ -27,6 +28,7 @@ export class RouteGlobalComponent implements OnInit {
   zoom = 2;
   markers: Marker[] = [];
   polilinea: Poly[] = [];
+  IpDestino: string;
 
   barChartOptions: ChartOptions = {
     responsive: true,
@@ -60,7 +62,29 @@ export class RouteGlobalComponent implements OnInit {
   ngOnInit() {
   }
 
-  obtenerTraza() {
+  sitioAmerica(servidor: string) {
+  const UrlAmerica = `http://www.slac.stanford.edu/cgi-bin/nph-traceroute.pl?target=${this.IpDestino}&function=traceroute`;
+  const UrlEuropa = `http://www.macomnet.net/testlab/cgi-bin/nph-trace?${this.IpDestino}`;
+  const UrlAsia = `http://as9371.bgp4.jp/lg.cgi?query=34&arg=${this.IpDestino}`;
+  const UrlOceania = `http://www.hafey.org/cgi-bin/bgplg?cmd=traceroute&req=${this.IpDestino}`;
+
+    if (servidor === 'America') {
+    window.open( UrlAmerica, '_blank');
+    }
+    if (servidor === 'Europa') {
+      window.open( UrlEuropa, '_blank');
+    }
+    if (servidor === 'Asia') {
+      window.open( UrlAsia, '_blank');
+    }
+    if (servidor === 'Oceania') {
+      window.open( UrlOceania, '_blank');
+    }
+
+  }
+
+  obtenerTraza(servidor: string) {
+    console.log(servidor);
     this.carga = false;
     this.mapa = false;
     this.separacion = [];
@@ -71,12 +95,84 @@ export class RouteGlobalComponent implements OnInit {
       this.separacion[i] = this.separacion[i].split(' ');
     }
     console.log(this.separacion);
-    if (this.OS_select === 'Linux') {
+    if ((servidor === 'America') || (servidor === 'Europa') ) {
+      this.CovertirJsonAmerica();
+    }
+    if (servidor === 'Oceania') {
+      this.CovertirJsonOceania();
+    }
+    if (servidor === 'Asia') {
       this.CovertirJsonLinux();
     }
-    if (this.OS_select === 'Windows') {
-      this.ConvertirJsonWindows();
+    // if (this.OS_select === 'Linux') {
+    //   this.CovertirJsonLinux();
+    // }
+  }
+
+  CovertirJsonAmerica() {
+    for (let indice = 1; indice < this.separacion.length - 1; indice++) {
+      let NumSalto: number;
+      let Nombre: string;
+      let IP: string;
+      // console.log(this.separacion[i].length);
+      console.log('json america');
+      if ( this.separacion[indice].length > 7 ) {
+        for (let j = 0; j < 3; j++) {
+          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
+            NumSalto = this.separacion[indice][j];
+          }
+        }
+        if (NumSalto > 9) {
+          Nombre = this.separacion[indice][2];
+          IP = this.separacion[indice][3].substring(1, this.separacion[indice][3].length - 1);
+        } else {
+          Nombre = this.separacion[indice][3];
+          IP = this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1);
+        }
+        this.JsonTraza.push({
+          salto: NumSalto,
+          nombre: Nombre,
+          ip: IP,
+          ms: this.separacion[indice][ this.separacion[indice].length - 2 ],
+        });
+      }
     }
+    console.log(this.JsonTraza);
+    this.obtenerGeo();
+    this.datosChart();
+  }
+
+  CovertirJsonOceania() {
+    for (let indice = 0; indice < this.separacion.length; indice++) {
+      let NumSalto: number;
+      let Nombre: string;
+      let IP: string;
+      // console.log(this.separacion[i].length);
+      console.log('json oceania');
+      if ( this.separacion[indice].length > 7 ) {
+        for (let j = 0; j < 3; j++) {
+          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
+            NumSalto = this.separacion[indice][j];
+          }
+        }
+        if ( (NumSalto < 2) || (NumSalto > 9) ) {
+          Nombre = this.separacion[indice][2];
+          IP = this.separacion[indice][3].substring(1, this.separacion[indice][3].length - 1);
+        } else {
+          Nombre = this.separacion[indice][3];
+          IP = this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1);
+        }
+        this.JsonTraza.push({
+          salto: NumSalto,
+          nombre: Nombre,
+          ip: IP,
+          ms: this.separacion[indice][ this.separacion[indice].length - 5 ],
+        });
+      }
+    }
+    console.log(this.JsonTraza);
+    this.obtenerGeo();
+    this.datosChart();
   }
 
   CovertirJsonLinux() {
@@ -89,63 +185,13 @@ export class RouteGlobalComponent implements OnInit {
             NumSalto = this.separacion[indice][j];
           }
         }
-        this.JsonTraza.push({
-          salto: NumSalto,
-          nombre: this.separacion[indice][3],
-          ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-          ms: this.separacion[indice][6],
-        });
-      }
-    }
-    console.log(this.JsonTraza);
-    this.obtenerGeo();
-    this.datosChart();
-  }
-
-  ConvertirJsonWindows() {
-    for (let indice = 0; indice < this.separacion.length; indice++) {
-      let NumSalto: number;
-      let Ms: string;
-      if (this.separacion[indice].length > 12) {
-        for (let j = 0; j < 3; j++) {
-          if ( ( Number(this.separacion[indice][j]) !== 0) && ( Number(this.separacion[indice][j]).toString() !== 'NaN' ) ) {
-            NumSalto = this.separacion[indice][j];
-          }
-        }
-        // console.log(this.separacion[indice]);
-        if ( this.separacion[indice][ this.separacion[ indice ].length - 3 ] !== '' ) {
-            // console.log(`el nombre del punto es ${this.separacion[indice][ this.separacion[ indice ].length - 3 ]}`);
-            if ( this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
-              if (this.separacion[indice][ this.separacion[ indice ].length - 6 ][0] === '<') {
-                Ms = this.separacion[indice][ this.separacion[ indice ].length - 6 ].substring(1);
-              } else {
-                Ms = this.separacion[indice][ this.separacion[ indice ].length - 6 ];
-              }
-              this.JsonTraza.push({
-                salto: NumSalto,
-                nombre: this.separacion[indice][ this.separacion[ indice ].length - 3 ],
-                // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-                ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ]
-                .substring(1, this.separacion[indice][ this.separacion[ indice ].length - 2 ].length - 1),
-                ms: Number(Ms),
-              });
-            }
-        } else {
-          // console.log(`no hay nombre solo direccion: ${this.separacion[indice][ this.separacion[ indice ].length - 2 ]}`);
-          if (this.separacion[indice][ this.separacion[ indice ].length - 2 ].length > 6 ) {
-            if (this.separacion[indice][ this.separacion[ indice ].length - 5 ][0] === '<') {
-              Ms = this.separacion[indice][ this.separacion[ indice ].length - 5 ].substring(1);
-            } else {
-              Ms = this.separacion[indice][ this.separacion[ indice ].length - 5 ];
-            }
-            this.JsonTraza.push({
-              salto: NumSalto,
-              nombre: '',
-              // ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
-              ip: this.separacion[indice][ this.separacion[ indice ].length - 2 ],
-              ms: Number(Ms),
-            });
-          }
+        if (NumSalto !== undefined) {
+          this.JsonTraza.push({
+            salto: NumSalto,
+            nombre: this.separacion[indice][3],
+            ip: this.separacion[indice][4].substring(1, this.separacion[indice][4].length - 1),
+            ms: this.separacion[indice][6],
+          });
         }
       }
     }
@@ -171,6 +217,7 @@ export class RouteGlobalComponent implements OnInit {
         this.JsonTraza[i]['organizacion'] = dato['organization'];
         this.JsonTraza[i]['tipo'] = 1; // si es 1 es publica
         if (i === ( this.JsonTraza.length - 1 ) ) {
+          console.log('termina el geo');
           console.log(this.JsonTraza);
           this.crearPuntos();
         }
@@ -197,6 +244,7 @@ export class RouteGlobalComponent implements OnInit {
   }
 
   crearPuntos () {
+    console.log('entra a puntos');
     for (let i = 0; i < this.JsonTraza.length; i++) {
       // console.log(this.JsonTraza[i]);  Number(this.separacion[indice][j]).toString() !== 'NaN'
       if (  this.JsonTraza[i]['tipo'] === 1) {
@@ -231,19 +279,6 @@ export class RouteGlobalComponent implements OnInit {
     }
   }
 
-  onFileSelect(input: HTMLInputElement) {
-    console.log(input);
-    const file: File = input.files[0];
-    const myReader = new FileReader();
-    myReader.readAsText(file);
-    myReader.onload = (e) => {
-      this.texto_obtenido = myReader.result;
-      this.texto_plano = this.texto_obtenido;
-      console.log(this.texto_plano);
-      this.obtenerTraza();
-  };
-  }
-
   // metodo para cambiar el tipo de chart
   public randomize(): void {
     this.barChartType = this.barChartType === 'bar' ? 'line' : 'bar';
@@ -260,14 +295,14 @@ export class RouteGlobalComponent implements OnInit {
 
   // fuuncion para obtener los labels a colocar en el eje horizontal
   saltosChart() {
-    let labelSaltos = [];
+    const labelSaltos = [];
     for (let i = 0; i < this.JsonTraza.length; i++) {
       labelSaltos.push(this.JsonTraza[i]['salto']);
     }
    return labelSaltos;
   }
   VelocidadSaltosChart() {
-    let labelVelocidad = [];
+    const labelVelocidad = [];
     for (let i = 0; i < this.JsonTraza.length; i++) {
       labelVelocidad.push( Number(this.JsonTraza[i]['ms']));
     }
