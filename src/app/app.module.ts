@@ -19,6 +19,7 @@ import {APP_ROUTING} from './app.routes';
 
 // import mdb
 import { MDBBootstrapModule } from 'angular-bootstrap-md';
+import { IconsModule } from 'angular-bootstrap-md';
 
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/shared/navbar/navbar.component';
@@ -52,6 +53,7 @@ import { FooterComponent } from './components/shared/footer/footer.component';
     NgxGraphModule,
     ReactiveFormsModule ,
     HttpClientModule,
+    IconsModule,
     MDBBootstrapModule.forRoot(),
     ThemeModule.forRoot(),
     AgmCoreModule.forRoot({
