@@ -528,10 +528,15 @@ MIT
 @angular/common
 MIT
 
-@angular/animations
+@angular/platform-browser
 MIT
 
-@angular/platform-browser
+@angular/forms
+MIT
+
+angular-bootstrap-md
+
+@angular/animations
 MIT
 
 @angular/cdk
@@ -562,9 +567,6 @@ THE SOFTWARE.
 @angular/material/bottom-sheet
 
 @angular/material/dialog
-
-@angular/forms
-MIT
 
 @angular/material/button
 
@@ -612,6 +614,8 @@ THE SOFTWARE.
 
 
 @angular/material/select
+
+@angular/material/tabs
 
 d3-color
 BSD-3-Clause
