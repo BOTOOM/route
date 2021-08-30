@@ -12,7 +12,6 @@ import { AgmCoreModule } from '@agm/core';
 
 // chart
 import { ChartsModule } from 'ng2-charts';
-import { NgxGraphModule } from '@swimlane/ngx-graph';
 
 // rutas
 import {APP_ROUTING} from './app.routes';
@@ -44,7 +43,6 @@ import { FooterComponent } from './components/shared/footer/footer.component';
     BrowserAnimationsModule,
     FormsModule,
     ChartsModule,
-    NgxGraphModule,
     ReactiveFormsModule ,
     HttpClientModule,
     IconsModule,
