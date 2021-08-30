@@ -7,8 +7,6 @@ import { RouteGlobalComponent } from './components/route-global/route-global.com
 
 const APP_ROUTES: Routes = [
   { path: 'home', component: HomeComponent },
-  { path: 'mat', component: MatComponent },
-  { path: 'plot', component: PlotComponent },
   { path: 'route-local', component: RouteLocalComponent },
   { path: 'route-global', component: RouteGlobalComponent },
   { path: '', pathMatch: 'full', redirectTo: 'home' },
