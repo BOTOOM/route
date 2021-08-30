@@ -1,7 +1,5 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './components/home/home.component';
-import { MatComponent } from './components/mat/mat.component';
-import { PlotComponent } from './components/plot/plot.component';
 import { RouteLocalComponent } from './components/route-local/route-local.component';
 import { RouteGlobalComponent } from './components/route-global/route-global.component';
 
