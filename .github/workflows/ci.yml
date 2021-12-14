@@ -3,18 +3,45 @@ on:
   push:
     branches:
       - master
+  # pull_request:
+  #   branches:
+  #     - master
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        node-version: [14.x]
+
     steps:
-    - uses: actions/checkout@v2
-    - name: All things angular
-      uses: AhsanAyaz/angular-deploy-gh-pages-actions@[version] ## replace by latest version without it you will see Expected format {org}/{repo}[/path]@ref. Actual 'AhsanAyaz/angular-deploy-gh-pages-actions',Input string was not in a correct format.
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node }}
+      uses: actions/setup-node@v2
       with:
-        github_access_token: ${{ secrets.ACCESS_TOKEN }} # see the Configuration section for how you can create secrets
-        build_configuration: production # The build environment for the app. please look configurations in your angular.json
-        base_href: /route/   # make sure this corresponds to https://<your_username>.github.io/<base_href>/
-        deploy_branch: gh-pages # The branch the action should deploy to.
-        angular_dist_build_folder: dist/route # The folder where your project is supposed to be after running ng build by the action.
+        node-version: ${{ matrix.node }}
+
+    - name: Install dependencies
+      run: npm install
+
+    # - name: Run the tests
+    #   run: npm test
+
+    - name: Build
+      run: npm run build --prod --base-href "https://botoom.github.io/${repository}/"
+      env:
+    - name: Deploy
+      run: |
+        git config --global user.name $user_name
+        git config --global user.email $user_email
+        git remote set-url origin https://${github_token}@github.com/${repository}
+        npx angular-cli-ghpages --dir=dist/${repository}
+      env:
+        user_name: 'BOTOOM'
+        user_email: 'eddiazr@correo.udistrital.edu.co'
+        github_token: ${{ secrets.ACCESS_TOKEN }}
+        repository: ${{ github.repository }}
