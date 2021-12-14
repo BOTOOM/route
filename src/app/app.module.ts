@@ -7,12 +7,6 @@ import { NgModule  } from '@angular/core';
 import { ThemeModule } from './theme.module';
 import {HttpClientModule} from '@angular/common/http';
 
-// import api google maps
-import { AgmCoreModule } from '@agm/core';
-
-// chart
-import { ChartsModule } from 'ng2-charts';
-
 // rutas
 import {APP_ROUTING} from './app.routes';
 
@@ -23,7 +17,6 @@ import { IconsModule } from 'angular-bootstrap-md';
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/shared/navbar/navbar.component';
 import { HomeComponent } from './components/home/home.component';
-import { RouteGlobalComponent } from './components/route-global/route-global.component';
 import { FooterComponent } from './components/shared/footer/footer.component';
 
 
@@ -32,7 +25,6 @@ import { FooterComponent } from './components/shared/footer/footer.component';
     AppComponent,
     NavbarComponent,
     HomeComponent,
-    RouteGlobalComponent,
     FooterComponent,
 
   ],
@@ -40,15 +32,11 @@ import { FooterComponent } from './components/shared/footer/footer.component';
     BrowserModule,
     BrowserAnimationsModule,
     FormsModule,
-    ChartsModule,
     ReactiveFormsModule ,
     HttpClientModule,
     IconsModule,
     MDBBootstrapModule.forRoot(),
     ThemeModule.forRoot(),
-    AgmCoreModule.forRoot({
-      apiKey: 'AIzaSyBeh_MR7yO7QzliNFhgITYzGnn80Dn_q74'
-    }),
     RouterModule.forRoot(APP_ROUTING, {useHash: true}),
     BrowserAnimationsModule
   ],
