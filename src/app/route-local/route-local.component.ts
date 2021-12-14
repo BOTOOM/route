@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { GeoipService } from '../../services/geoip.service';
+import { GeoipService } from '../services/geoip.service';
 import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import { Label } from 'ng2-charts';
 

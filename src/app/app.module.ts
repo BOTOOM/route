@@ -23,7 +23,6 @@ import { IconsModule } from 'angular-bootstrap-md';
 import { AppComponent } from './app.component';
 import { NavbarComponent } from './components/shared/navbar/navbar.component';
 import { HomeComponent } from './components/home/home.component';
-import { RouteLocalComponent } from './components/route-local/route-local.component';
 import { RouteGlobalComponent } from './components/route-global/route-global.component';
 import { FooterComponent } from './components/shared/footer/footer.component';
 
@@ -33,7 +32,6 @@ import { FooterComponent } from './components/shared/footer/footer.component';
     AppComponent,
     NavbarComponent,
     HomeComponent,
-    RouteLocalComponent,
     RouteGlobalComponent,
     FooterComponent,
 
