@@ -1,40 +1,101 @@
-# Proyecto elaborado por :
-- Edwar Diaz Ruiz **Cod: 20141020004**
-- Daissi Bibiana Gonzalez Roldan **Cod: 20152020108**
+# Uni Route
 
-# Route
+Aplicación web para analizar traceroutes locales y globales con una interfaz moderna, mapas, gráficas de latencia y un parser más robusto que el proyecto Angular original.
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.2.3.
+## Stack
 
-## Development server
+- Vite + React + TypeScript
+- pnpm
+- shadcn/ui
+- mapcn + MapLibre
+- Recharts
+- Vitest
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+## Qué incluye esta modernización
 
-## Code scaffolding
+- `Route Local` para pegar o cargar salidas de `tracert` y `traceroute`
+- `Route Global` con catálogo curado de looking glasses por continente
+- normalización tipada de hops, IPs, latencias y estados geo
+- mapas y visualización de latencia desacoplados y cargados bajo demanda
+- despliegue estático a GitHub Pages desde GitHub Actions
+- preservación del proyecto anterior en `legacy/angular-route/`
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Requisitos
 
-## Build
+- Node.js 22+
+- pnpm 10+
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+## Desarrollo local
 
-## Running unit tests
+```bash
+pnpm install
+pnpm dev
+```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+La aplicación quedará disponible en `http://localhost:5173/route/`.
 
-## Running end-to-end tests
+## Scripts
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+```bash
+pnpm dev
+pnpm lint
+pnpm test
+pnpm test:coverage
+pnpm build
+pnpm preview
+```
 
-## Further help
+## Variables de entorno
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Crea un `.env.local` opcional si quieres usar `ipgeolocation.io` como proveedor principal:
 
-## gh-pages
-npm install -g angular-cli-ghpages
-npm i angular-cli-ghpages --save-dev
+```bash
+VITE_IPGEOLOCATION_API_KEY=tu_api_key
+```
 
+Si no se configura, la app usa `ipwho.is` como fallback público.
 
-ng build --prod --base-href "https://botoom.github.io/route/"
-npx angular-cli-ghpages --dir=dist/route
+## Cómo usar la app
 
+### Route Local
+
+1. Ejecuta `tracert dominio.com` en Windows o `traceroute dominio.com` en Linux/macOS.
+2. Copia la salida completa o carga un archivo `.txt`.
+3. Elige el perfil correcto y analiza el resultado.
+
+### Route Global
+
+1. Abre una looking glass desde el continente que quieras estudiar.
+2. Ejecuta traceroute contra tu destino.
+3. Pega el resultado bruto en la app para normalizarlo y compararlo.
+
+## Limitaciones conocidas
+
+- El navegador no puede ejecutar traceroute nativo del sistema operativo del usuario.
+- Por eso el flujo web actual usa copiar/pegar o archivo; un helper/CLI local quedaría como fase futura.
+- Muchas looking glasses bloquean iframes por CSP o `X-Frame-Options`, así que el flujo principal abre herramientas en una nueva pestaña.
+- La resolución geográfica depende de APIs públicas y su disponibilidad.
+
+## Despliegue
+
+El repositorio publica la SPA en GitHub Pages desde la rama `master` usando artifacts de GitHub Actions. La configuración de Vite ya usa la base correcta:
+
+```ts
+base: "/route/"
+```
+
+Para habilitar Pages en GitHub:
+
+1. Activa **Settings → Pages → Build and deployment → GitHub Actions**.
+2. Opcionalmente crea el secret `VITE_IPGEOLOCATION_API_KEY`.
+3. Haz push a `master`.
+
+## Estructura relevante
+
+```text
+legacy/angular-route/   # referencia histórica del proyecto Angular
+src/lib/traceroute.ts   # dominio de parsing, geodatos y métricas
+src/lib/global-tools.ts # catálogo de looking glasses
+src/pages/              # Home, Local, Global y 404
+src/components/         # layout, resultados, mapa y gráfica
+```
