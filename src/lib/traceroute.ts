@@ -35,6 +35,18 @@ export type GeoLookupStatus =
 
 export type GeoLookupProvider = "ipgeolocation" | "ipinfo" | "ipapi" | "local"
 
+export type TraceWarning =
+  | { code: "noValidHops" }
+  | { code: "unresolvedHops"; count: number }
+
+export type GeoLookupMessageKey =
+  | "missingIp"
+  | "privateIp"
+  | "pending"
+  | "providerHttp"
+  | "notResolved"
+  | "lookupFailed"
+
 export type TraceHop = {
   id: string
   hop: number
@@ -52,7 +64,7 @@ export type ParsedTrace = {
   source: TraceSource
   destination: string | null
   hops: TraceHop[]
-  warnings: string[]
+  warnings: TraceWarning[]
   raw: string
 }
 
@@ -68,6 +80,8 @@ export type GeoLookup = {
   latitude: number | null
   longitude: number | null
   message: string | null
+  messageKey: GeoLookupMessageKey | null
+  messageParams?: Record<string, string | number>
 }
 
 export type TraceMetric = {
@@ -307,19 +321,15 @@ function parseLines(raw: string, source: TraceSource) {
 
 export function parseTrace(raw: string, source: TraceSource): ParsedTrace {
   const hops = parseLines(raw, source)
-  const warnings: string[] = []
+  const warnings: TraceWarning[] = []
 
   if (hops.length === 0) {
-    warnings.push(
-      "No se detectaron saltos válidos. Verifica que pegaste la salida completa o prueba otro formato de resultado.",
-    )
+    warnings.push({ code: "noValidHops" })
   }
 
   const unresolvedHops = hops.filter((hop) => hop.unresolved).length
   if (unresolvedHops > 0) {
-    warnings.push(
-      `Se detectaron ${unresolvedHops} saltos sin respuesta o sin IP visible.`,
-    )
+    warnings.push({ code: "unresolvedHops", count: unresolvedHops })
   }
 
   return {
@@ -357,7 +367,8 @@ function buildLocalGeoState(ip: string | null, isPrivate: boolean): GeoLookup {
       city: null,
       latitude: null,
       longitude: null,
-      message: "El salto no expone una IP pública.",
+      message: null,
+      messageKey: "missingIp",
     }
   }
 
@@ -373,7 +384,8 @@ function buildLocalGeoState(ip: string | null, isPrivate: boolean): GeoLookup {
       city: null,
       latitude: null,
       longitude: null,
-      message: "IP privada, reservada o interna; no se intenta geolocalizar.",
+      message: null,
+      messageKey: "privateIp",
     }
   }
 
@@ -388,7 +400,8 @@ function buildLocalGeoState(ip: string | null, isPrivate: boolean): GeoLookup {
     city: null,
     latitude: null,
     longitude: null,
-    message: "Pendiente de resolución geográfica.",
+    message: null,
+    messageKey: "pending",
   }
 }
 
@@ -409,7 +422,12 @@ async function fetchIpGeolocation(ip: string, apiKey: string): Promise<GeoLookup
       city: null,
       latitude: null,
       longitude: null,
-      message: `ipgeolocation respondió ${response.status}.`,
+      message: null,
+      messageKey: "providerHttp",
+      messageParams: {
+        provider: "ipgeolocation",
+        status: response.status,
+      },
     }
   }
 
@@ -427,6 +445,7 @@ async function fetchIpGeolocation(ip: string, apiKey: string): Promise<GeoLookup
     latitude: parseNumber(payload.latitude),
     longitude: parseNumber(payload.longitude),
     message: null,
+    messageKey: null,
   }
 }
 
@@ -447,7 +466,12 @@ async function fetchIpinfo(ip: string, token: string): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message: `ipinfo respondió ${response.status}.`,
+      message: null,
+      messageKey: "providerHttp",
+      messageParams: {
+        provider: "ipinfo",
+        status: response.status,
+      },
     }
   }
 
@@ -467,10 +491,8 @@ async function fetchIpinfo(ip: string, token: string): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message:
-        payload.error?.message ??
-        payload.error?.title ??
-        "No se pudo resolver la IP.",
+      message: payload.error?.message ?? payload.error?.title ?? null,
+      messageKey: "notResolved",
     }
   }
 
@@ -486,6 +508,7 @@ async function fetchIpinfo(ip: string, token: string): Promise<GeoLookup> {
     latitude: Number.isFinite(latitude) ? latitude : null,
     longitude: Number.isFinite(longitude) ? longitude : null,
     message: null,
+    messageKey: null,
   }
 }
 
@@ -504,7 +527,12 @@ async function fetchIpapi(ip: string): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message: `ipapi.co respondió ${response.status}.`,
+      message: null,
+      messageKey: "providerHttp",
+      messageParams: {
+        provider: "ipapi.co",
+        status: response.status,
+      },
     }
   }
 
@@ -522,7 +550,8 @@ async function fetchIpapi(ip: string): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message: payload.reason ?? "No se pudo resolver la IP.",
+      message: payload.reason ?? null,
+      messageKey: "notResolved",
     }
   }
 
@@ -538,6 +567,7 @@ async function fetchIpapi(ip: string): Promise<GeoLookup> {
     latitude: parseNumber(payload.latitude),
     longitude: parseNumber(payload.longitude),
     message: null,
+    messageKey: null,
   }
 }
 
@@ -581,10 +611,8 @@ async function resolveGeo(ip: string, isPrivate: boolean): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message:
-        error instanceof Error
-          ? error.message
-          : "No fue posible resolver la geolocalización.",
+      message: error instanceof Error ? error.message : null,
+      messageKey: "lookupFailed",
     }
   }
 }
@@ -697,36 +725,44 @@ export function getMapCenter(trace: ParsedTrace): [number, number] {
 }
 
 export function formatGeoStatus(geo: GeoLookup | null) {
+  return getGeoStatusKey(geo)
+}
+
+export function getGeoStatusKey(geo: GeoLookup | null) {
   if (!geo) {
-    return "Sin datos"
+    return "traceroute.geoStatus.empty"
   }
 
   switch (geo.status) {
     case "resolved":
-      return "Resuelta"
+      return "traceroute.geoStatus.resolved"
     case "private":
-      return "Privada"
+      return "traceroute.geoStatus.private"
     case "missing-ip":
-      return "Sin IP"
+      return "traceroute.geoStatus.missingIp"
     case "not-found":
-      return "No encontrada"
+      return "traceroute.geoStatus.notFound"
     case "provider-unconfigured":
-      return "Pendiente"
+      return "traceroute.geoStatus.providerUnconfigured"
     case "error":
-      return "Error"
+      return "traceroute.geoStatus.error"
     default:
-      return "Sin datos"
+      return "traceroute.geoStatus.empty"
   }
 }
 
 export function getSourceLabel(source: TraceSource) {
+  return getSourceLabelKey(source)
+}
+
+export function getSourceLabelKey(source: TraceSource) {
   const labels: Record<TraceSource, string> = {
-    windows: "Windows / tracert",
-    linux: "Linux / macOS / traceroute",
-    america: "Looking glass América",
-    europa: "Looking glass Europa",
-    asia: "Looking glass Asia",
-    oceania: "Looking glass Oceanía",
+    windows: "traceroute.source.windows",
+    linux: "traceroute.source.linux",
+    america: "traceroute.source.america",
+    europa: "traceroute.source.europa",
+    asia: "traceroute.source.asia",
+    oceania: "traceroute.source.oceania",
   }
 
   return labels[source]

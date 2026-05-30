@@ -60,9 +60,7 @@ describe("parseTrace", () => {
       latencyMs: 11,
     })
     expect(parsed.hops[3]?.unresolved).toBe(true)
-    expect(parsed.warnings).toContain(
-      "Se detectaron 1 saltos sin respuesta o sin IP visible.",
-    )
+    expect(parsed.warnings).toContainEqual({ code: "unresolvedHops", count: 1 })
   })
 
   it("normalizes Unix traceroute output", () => {
