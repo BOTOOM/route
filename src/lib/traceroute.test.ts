@@ -24,7 +24,7 @@ const unixTrace = `
 traceroute to github.com (140.82.121.4), 30 hops max, 60 byte packets
  1  _gateway (192.168.1.1)  1.123 ms  0.991 ms  0.900 ms
  2  172.16.0.1  5.111 ms  5.053 ms  5.008 ms
- 3  core1.isp.net (198.51.100.9)  20.111 ms  19.888 ms  20.002 ms
+ 3  dns.google (8.8.8.8)  20.111 ms  19.888 ms  20.002 ms
  4  * * *
 `
 
@@ -76,8 +76,8 @@ describe("parseTrace", () => {
       isPrivate: true,
     })
     expect(parsed.hops[2]).toMatchObject({
-      host: "core1.isp.net",
-      ip: "198.51.100.9",
+      host: "dns.google",
+      ip: "8.8.8.8",
       isPrivate: false,
       latencyMs: 20,
     })
@@ -108,7 +108,12 @@ describe("trace helpers", () => {
     expect(isPrivateIpv4("10.0.0.1")).toBe(true)
     expect(isPrivateIpv4("172.16.4.9")).toBe(true)
     expect(isPrivateIpv4("192.168.10.8")).toBe(true)
+    expect(isPrivateIpv4("100.64.0.1")).toBe(true)
     expect(isPrivateIpv4("169.254.1.10")).toBe(true)
+    expect(isPrivateIpv4("192.0.2.1")).toBe(true)
+    expect(isPrivateIpv4("198.51.100.9")).toBe(true)
+    expect(isPrivateIpv4("203.0.113.5")).toBe(true)
+    expect(isPrivateIpv4("224.0.0.1")).toBe(true)
     expect(isPrivateIpv4("8.8.8.8")).toBe(false)
   })
 
@@ -116,17 +121,13 @@ describe("trace helpers", () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
-        success: true,
-        ip: "198.51.100.9",
-        continent: "North America",
-        country: "United States",
-        city: "San Jose",
-        latitude: 37.3382,
-        longitude: -121.8863,
-        connection: {
-          isp: "Example ISP",
-          org: "Example Backbone",
-        },
+        ip: "8.8.8.8",
+        city: "Mountain View",
+        country_name: "United States",
+        continent_code: "NA",
+        latitude: 37.3861,
+        longitude: -122.0839,
+        org: "Google LLC",
       }),
     })
 
@@ -137,12 +138,12 @@ describe("trace helpers", () => {
     const metrics = getTraceMetrics(enriched)
 
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(fetchMock).toHaveBeenCalledWith("https://ipwho.is/198.51.100.9")
+    expect(fetchMock).toHaveBeenCalledWith("https://ipapi.co/8.8.8.8/json/")
     expect(enriched.hops[0]?.geo?.status).toBe("private")
     expect(enriched.hops[2]?.geo).toMatchObject({
       status: "resolved",
       country: "United States",
-      city: "San Jose",
+      city: "Mountain View",
     })
     expect(metrics).toMatchObject({
       totalHops: 4,
@@ -156,6 +157,6 @@ describe("trace helpers", () => {
     expect(metrics.averageLatencyMs).toBeCloseTo(8.69, 2)
     expect(getChartData(enriched)).toHaveLength(3)
     expect(getMapHops(enriched)).toHaveLength(1)
-    expect(getMapCenter(enriched)).toEqual([-121.8863, 37.3382])
+    expect(getMapCenter(enriched)).toEqual([-122.0839, 37.3861])
   })
 })

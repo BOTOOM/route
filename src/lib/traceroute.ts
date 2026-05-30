@@ -33,7 +33,7 @@ export type GeoLookupStatus =
   | "provider-unconfigured"
   | "error"
 
-export type GeoLookupProvider = "ipgeolocation" | "ipwhois" | "local"
+export type GeoLookupProvider = "ipgeolocation" | "ipinfo" | "ipapi" | "local"
 
 export type TraceHop = {
   id: string
@@ -108,22 +108,33 @@ const ipgeolocationSchema = z.object({
   longitude: z.union([z.string(), z.number()]).nullable().optional(),
 })
 
-const ipwhoisSchema = z.object({
-  success: z.boolean().optional(),
+const ipinfoSchema = z.object({
   ip: z.string().optional(),
-  continent: z.string().nullable().optional(),
-  country: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
-  latitude: z.union([z.string(), z.number()]).nullable().optional(),
-  longitude: z.union([z.string(), z.number()]).nullable().optional(),
-  connection: z
+  country: z.string().nullable().optional(),
+  loc: z.string().nullable().optional(),
+  org: z.string().nullable().optional(),
+  bogon: z.boolean().optional(),
+  error: z
     .object({
-      isp: z.string().nullable().optional(),
-      org: z.string().nullable().optional(),
+      title: z.string().nullable().optional(),
+      message: z.string().nullable().optional(),
     })
     .nullable()
     .optional(),
-  message: z.string().nullable().optional(),
+})
+
+const ipapiSchema = z.object({
+  ip: z.string().optional(),
+  city: z.string().nullable().optional(),
+  country_name: z.string().nullable().optional(),
+  continent_code: z.string().nullable().optional(),
+  latitude: z.union([z.string(), z.number()]).nullable().optional(),
+  longitude: z.union([z.string(), z.number()]).nullable().optional(),
+  org: z.string().nullable().optional(),
+  asn: z.string().nullable().optional(),
+  reason: z.string().nullable().optional(),
+  error: z.boolean().optional(),
 })
 
 function average(values: number[]) {
@@ -300,7 +311,7 @@ export function parseTrace(raw: string, source: TraceSource): ParsedTrace {
 
   if (hops.length === 0) {
     warnings.push(
-      "No se detectaron saltos válidos. Verifica que pegaste la salida completa del traceroute o cambia el perfil del parser.",
+      "No se detectaron saltos válidos. Verifica que pegaste la salida completa o prueba otro formato de resultado.",
     )
   }
 
@@ -362,7 +373,7 @@ function buildLocalGeoState(ip: string | null, isPrivate: boolean): GeoLookup {
       city: null,
       latitude: null,
       longitude: null,
-      message: "IP privada o interna; no se intenta geolocalizar.",
+      message: "IP privada, reservada o interna; no se intenta geolocalizar.",
     }
   }
 
@@ -419,13 +430,15 @@ async function fetchIpGeolocation(ip: string, apiKey: string): Promise<GeoLookup
   }
 }
 
-async function fetchIpwhois(ip: string): Promise<GeoLookup> {
-  const response = await fetch(`https://ipwho.is/${ip}`)
+async function fetchIpinfo(ip: string, token: string): Promise<GeoLookup> {
+  const response = await fetch(
+    `https://ipinfo.io/${ip}/json?token=${encodeURIComponent(token)}`,
+  )
 
   if (!response.ok) {
     return {
       ip,
-      provider: "ipwhois",
+      provider: "ipinfo",
       status: "error",
       isp: null,
       organization: null,
@@ -434,16 +447,73 @@ async function fetchIpwhois(ip: string): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message: `ipwho.is respondió ${response.status}.`,
+      message: `ipinfo respondió ${response.status}.`,
     }
   }
 
-  const payload = ipwhoisSchema.parse(await response.json())
+  const payload = ipinfoSchema.parse(await response.json())
+  const [latitude, longitude] =
+    payload.loc?.split(",").map((value) => Number(value)) ?? []
 
-  if (payload.success === false) {
+  if (payload.bogon || payload.error) {
     return {
       ip,
-      provider: "ipwhois",
+      provider: "ipinfo",
+      status: payload.bogon ? "private" : "not-found",
+      isp: null,
+      organization: null,
+      continent: null,
+      country: null,
+      city: null,
+      latitude: null,
+      longitude: null,
+      message:
+        payload.error?.message ??
+        payload.error?.title ??
+        "No se pudo resolver la IP.",
+    }
+  }
+
+  return {
+    ip,
+    provider: "ipinfo",
+    status: "resolved",
+    isp: payload.org ?? null,
+    organization: payload.org ?? null,
+    continent: null,
+    country: payload.country ?? null,
+    city: payload.city ?? null,
+    latitude: Number.isFinite(latitude) ? latitude : null,
+    longitude: Number.isFinite(longitude) ? longitude : null,
+    message: null,
+  }
+}
+
+async function fetchIpapi(ip: string): Promise<GeoLookup> {
+  const response = await fetch(`https://ipapi.co/${ip}/json/`)
+
+  if (!response.ok) {
+    return {
+      ip,
+      provider: "ipapi",
+      status: "error",
+      isp: null,
+      organization: null,
+      continent: null,
+      country: null,
+      city: null,
+      latitude: null,
+      longitude: null,
+      message: `ipapi.co respondió ${response.status}.`,
+    }
+  }
+
+  const payload = ipapiSchema.parse(await response.json())
+
+  if (payload.error) {
+    return {
+      ip,
+      provider: "ipapi",
       status: "not-found",
       isp: null,
       organization: null,
@@ -452,18 +522,18 @@ async function fetchIpwhois(ip: string): Promise<GeoLookup> {
       city: null,
       latitude: null,
       longitude: null,
-      message: payload.message ?? "No se pudo resolver la IP.",
+      message: payload.reason ?? "No se pudo resolver la IP.",
     }
   }
 
   return {
     ip,
-    provider: "ipwhois",
+    provider: "ipapi",
     status: "resolved",
-    isp: payload.connection?.isp ?? null,
-    organization: payload.connection?.org ?? null,
-    continent: payload.continent ?? null,
-    country: payload.country ?? null,
+    isp: payload.org ?? payload.asn ?? null,
+    organization: payload.org ?? null,
+    continent: payload.continent_code ?? null,
+    country: payload.country_name ?? null,
     city: payload.city ?? null,
     latitude: parseNumber(payload.latitude),
     longitude: parseNumber(payload.longitude),
@@ -476,21 +546,33 @@ async function resolveGeo(ip: string, isPrivate: boolean): Promise<GeoLookup> {
     return buildLocalGeoState(ip, true)
   }
 
-  const apiKey = import.meta.env.VITE_IPGEOLOCATION_API_KEY?.trim()
+  const ipinfoToken = import.meta.env.VITE_IPINFO_TOKEN?.trim()
+  const ipgeolocationApiKey = import.meta.env.VITE_IPGEOLOCATION_API_KEY?.trim()
 
   try {
-    if (apiKey) {
-      const primary = await fetchIpGeolocation(ip, apiKey)
+    if (ipinfoToken) {
+      const primary = await fetchIpinfo(ip, ipinfoToken)
       if (primary.status === "resolved") {
         return primary
       }
     }
 
-    return await fetchIpwhois(ip)
+    if (ipgeolocationApiKey) {
+      const secondary = await fetchIpGeolocation(ip, ipgeolocationApiKey)
+      if (secondary.status === "resolved") {
+        return secondary
+      }
+    }
+
+    return await fetchIpapi(ip)
   } catch (error) {
     return {
       ip,
-      provider: apiKey ? "ipgeolocation" : "ipwhois",
+      provider: ipinfoToken
+        ? "ipinfo"
+        : ipgeolocationApiKey
+          ? "ipgeolocation"
+          : "ipapi",
       status: "error",
       isp: null,
       organization: null,
@@ -651,9 +733,22 @@ export function getSourceLabel(source: TraceSource) {
 }
 
 export function isPrivateIpv4(ip: string) {
-  const [first, second] = ip.split(".").map(Number)
+  const octets = ip.split(".").map(Number)
+  const [first, second, third, fourth] = octets
 
-  if (first === 10) {
+  if (octets.length !== 4 || octets.some((octet) => !Number.isInteger(octet))) {
+    return true
+  }
+
+  if (first === 0 || first === 10 || first === 127) {
+    return true
+  }
+
+  if (first === 100 && second >= 64 && second <= 127) {
+    return true
+  }
+
+  if (first === 169 && second === 254) {
     return true
   }
 
@@ -661,13 +756,33 @@ export function isPrivateIpv4(ip: string) {
     return true
   }
 
+  if (first === 192 && second === 0 && third === 0) {
+    return true
+  }
+
+  if (first === 192 && second === 0 && third === 2) {
+    return true
+  }
+
   if (first === 192 && second === 168) {
     return true
   }
 
-  if (first === 127 || first === 0 || first === 169) {
+  if (first === 198 && (second === 18 || second === 19)) {
     return true
   }
 
-  return false
+  if (first === 198 && second === 51 && third === 100) {
+    return true
+  }
+
+  if (first === 203 && second === 0 && third === 113) {
+    return true
+  }
+
+  if (first === 255 && second === 255 && third === 255 && fourth === 255) {
+    return true
+  }
+
+  return first >= 224
 }

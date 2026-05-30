@@ -166,7 +166,7 @@ export function TraceResults({
           {trace.warnings.length > 0 && (
             <Alert className="border-amber-400/20 bg-amber-400/10 text-amber-100">
               <Activity className="size-4" />
-              <AlertTitle>Observaciones del parser</AlertTitle>
+              <AlertTitle>Observaciones del análisis</AlertTitle>
               <AlertDescription>
                 <ul className="space-y-1 pl-4">
                   {trace.warnings.map((warning) => (

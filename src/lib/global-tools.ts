@@ -87,7 +87,7 @@ export const LOOKING_GLASS_TOOLS: LookingGlassTool[] = [
     instructions: [
       "Selecciona el nodo europeo que más te interese.",
       "Ejecuta traceroute y copia la salida generada.",
-      "Si el formato no encaja, cambia el perfil de parser manualmente.",
+      "Si Uni Route no interpreta bien el texto, prueba el formato Linux/macOS.",
     ],
   },
   {
@@ -133,7 +133,7 @@ export const LOOKING_GLASS_TOOLS: LookingGlassTool[] = [
       "Complementa bien los resultados de Asia cuando quieres otro operador o punto de vista.",
     instructions: [
       "Abre la herramienta y lanza traceroute desde un nodo de la región.",
-      "Ajusta el parser a Linux si la salida es tipo traceroute clásico.",
+      "Usa el formato Linux/macOS si la salida se parece a traceroute clásico.",
       "Pega el resultado textual para visualizar los saltos.",
     ],
   },
