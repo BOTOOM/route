@@ -1,4 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import {
   AlertTriangle,
   Copy,
@@ -7,7 +8,8 @@ import {
   TerminalSquare,
 } from "lucide-react"
 
-import { enrichTraceWithGeo, parseTrace, type ParsedTrace, type TraceSource } from "@/lib/traceroute"
+import type { TraceSource } from "@/lib/traceroute"
+import { useTraceAnalysis } from "@/hooks/use-trace-analysis"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -21,6 +23,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { cn } from "@/lib/utils"
+import { TraceResultsFallback } from "@/components/trace-results-fallback"
 
 type InputMode = "paste" | "file"
 
@@ -30,49 +33,33 @@ const TraceResults = lazy(() =>
   })),
 )
 
-function ResultsFallback() {
-  return (
-    <Card className="border-white/10 bg-white/5">
-      <CardHeader>
-        <div className="h-6 w-52 animate-pulse rounded-full bg-white/10" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="h-28 animate-pulse rounded-2xl bg-white/10" />
-        <div className="h-64 animate-pulse rounded-3xl bg-white/10" />
-      </CardContent>
-    </Card>
-  )
-}
-
 const localSources: {
   value: Extract<TraceSource, "windows" | "linux">
-  label: string
+  labelKey: string
   command: string
-  hint: string
+  hintKey: string
 }[] = [
   {
     value: "windows",
-    label: "Windows",
+    labelKey: "local.sources.windows.label",
     command: "tracert github.com",
-    hint: "Copia el resultado completo que aparece después de ejecutar `tracert`.",
+    hintKey: "local.sources.windows.hint",
   },
   {
     value: "linux",
-    label: "Linux / macOS",
+    labelKey: "local.sources.linux.label",
     command: "traceroute github.com",
-    hint: "Copia todas las líneas que devuelve `traceroute`, incluso las que tengan asteriscos.",
+    hintKey: "local.sources.linux.hint",
   },
 ]
 
 export function LocalPage() {
+  const { t } = useTranslation()
   const [source, setSource] = useState<Extract<TraceSource, "windows" | "linux">>("windows")
   const [inputMode, setInputMode] = useState<InputMode>("paste")
   const [rawTrace, setRawTrace] = useState("")
   const [fileName, setFileName] = useState<string | null>(null)
-  const [trace, setTrace] = useState<ParsedTrace | null>(null)
-  const [resolvingGeo, setResolvingGeo] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const requestIdRef = useRef(0)
+  const { analyzeTrace, error, resolvingGeo, setError, trace } = useTraceAnalysis()
   const copyFeedbackTimeoutRef = useRef<number | null>(null)
   const copyLabelRef = useRef<HTMLSpanElement | null>(null)
 
@@ -85,32 +72,11 @@ export function LocalPage() {
   }, [])
 
   async function handleAnalyze() {
-    setError(null)
-
-    if (!rawTrace.trim()) {
-      setError("Pega una salida de traceroute o carga un archivo antes de analizar.")
-      return
-    }
-
-    const requestId = requestIdRef.current + 1
-    requestIdRef.current = requestId
-
-    const parsed = parseTrace(rawTrace, source)
-    setTrace(parsed)
-
-    if (parsed.hops.length === 0) {
-      return
-    }
-
-    setResolvingGeo(true)
-    const enriched = await enrichTraceWithGeo(parsed)
-
-    if (requestIdRef.current !== requestId) {
-      return
-    }
-
-    setTrace(enriched)
-    setResolvingGeo(false)
+    await analyzeTrace({
+      rawTrace,
+      source,
+      emptyMessage: t("local.errors.empty"),
+    })
   }
 
   async function handleFileChange(file: File | null) {
@@ -129,7 +95,7 @@ export function LocalPage() {
       setError(
         fileError instanceof Error
           ? fileError.message
-          : "No fue posible leer el archivo seleccionado.",
+          : t("local.errors.fileRead"),
       )
     }
   }
@@ -139,7 +105,7 @@ export function LocalPage() {
   const handleCopyCommand = useCallback(() => {
     setError(null)
     if (copyLabelRef.current) {
-      copyLabelRef.current.textContent = "Copiado"
+      copyLabelRef.current.textContent = t("local.form.copied")
     }
 
     if (copyFeedbackTimeoutRef.current !== null) {
@@ -148,19 +114,21 @@ export function LocalPage() {
 
     copyFeedbackTimeoutRef.current = window.setTimeout(() => {
       if (copyLabelRef.current) {
-        copyLabelRef.current.textContent = "Copiar"
+        copyLabelRef.current.textContent = t("local.form.copy")
       }
       copyFeedbackTimeoutRef.current = null
     }, 1800)
 
-    void copyTextToClipboard(activeSource.command).catch((copyError: unknown) => {
-      setError(
-        copyError instanceof Error
-          ? `No fue posible copiar el comando: ${copyError.message}`
-          : "No fue posible copiar el comando. Cópialo manualmente desde la tarjeta.",
-      )
+    void copyTextToClipboard(activeSource.command).catch(() => {
+      setError(t("local.errors.copyFallback"))
     })
-  }, [activeSource.command])
+  }, [activeSource.command, setError, t])
+
+  useEffect(() => {
+    if (copyLabelRef.current) {
+      copyLabelRef.current.textContent = t("local.form.copy")
+    }
+  }, [source, t])
 
   useEffect(() => {
     const copyButton = document.querySelector<HTMLButtonElement>(
@@ -183,16 +151,15 @@ export function LocalPage() {
           <CardHeader className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-emerald-400/15 text-emerald-200 hover:bg-emerald-400/20">
-                Route Local
+                {t("local.badge")}
               </Badge>
             </div>
             <div>
               <CardTitle className="text-3xl text-white">
-                Analiza una ruta generada en tu propio equipo
+                {t("local.title")}
               </CardTitle>
               <CardDescription className="mt-3 max-w-2xl text-base text-slate-300">
-                Ejecuta un comando, pega la salida o carga un archivo, y convierte el
-                resultado en saltos, latencia y mapa.
+                {t("local.description")}
               </CardDescription>
             </div>
           </CardHeader>
@@ -200,14 +167,13 @@ export function LocalPage() {
 
         <Card className="border-amber-400/15 bg-amber-400/10">
           <CardHeader>
-            <CardTitle className="text-white">Cómo obtener la traza</CardTitle>
+            <CardTitle className="text-white">{t("local.howTo.title")}</CardTitle>
             <CardDescription className="text-slate-200">
-              Por seguridad, el navegador no ejecuta comandos de tu sistema.
+              {t("local.howTo.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-slate-200">
-            Abre una terminal, ejecuta el comando sugerido y pega aquí el resultado.
-            También puedes guardar la salida en un archivo de texto y subirlo.
+            {t("local.howTo.body")}
           </CardContent>
         </Card>
       </section>
@@ -215,14 +181,14 @@ export function LocalPage() {
       <section className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Prepara tu resultado</CardTitle>
+            <CardTitle className="text-white">{t("local.form.title")}</CardTitle>
             <CardDescription className="text-slate-400">
-              Elige tu sistema para que Uni Route lea mejor el texto que vas a pegar.
+              {t("local.form.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Sistema operativo</p>
+              <p className="text-sm font-medium text-slate-200">{t("local.form.osLabel")}</p>
               <div className="flex flex-wrap gap-2">
                 {localSources.map((item) => (
                   <Button
@@ -240,16 +206,16 @@ export function LocalPage() {
                     ) : (
                       <TerminalSquare className="size-4" />
                     )}
-                    {item.label}
+                    {t(item.labelKey)}
                   </Button>
                 ))}
               </div>
-              <p className="text-sm text-slate-400">{activeSource.hint}</p>
+              <p className="text-sm text-slate-400">{t(activeSource.hintKey)}</p>
               <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-3 shadow-2xl shadow-slate-950/20">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div>
                     <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
-                      Comando sugerido
+                      {t("local.form.suggestedCommand")}
                     </p>
                     <code className="mt-1 block break-all font-mono text-sm text-cyan-200">
                       {activeSource.command}
@@ -259,17 +225,17 @@ export function LocalPage() {
                     type="button"
                     data-copy-command-button="true"
                     className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-3 text-sm font-medium text-cyan-100 outline-none transition-transform duration-200 ease-out hover:bg-cyan-300/20 focus-visible:ring-3 focus-visible:ring-cyan-300/40 active:scale-[0.96]"
-                    aria-label={`Copiar comando para ${activeSource.label}`}
+                    aria-label={t("local.form.copyAria", { label: t(activeSource.labelKey) })}
                   >
                     <Copy className="size-4" />
-                    <span ref={copyLabelRef}>Copiar</span>
+                    <span ref={copyLabelRef}>{t("local.form.copy")}</span>
                   </button>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Cómo vas a ingresar el resultado</p>
+              <p className="text-sm font-medium text-slate-200">{t("local.form.inputMode")}</p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={inputMode === "paste" ? "default" : "outline"}
@@ -280,7 +246,7 @@ export function LocalPage() {
                   )}
                   onClick={() => setInputMode("paste")}
                 >
-                  Pegar texto
+                  {t("local.form.paste")}
                 </Button>
                 <Button
                   variant={inputMode === "file" ? "default" : "outline"}
@@ -292,7 +258,7 @@ export function LocalPage() {
                   onClick={() => setInputMode("file")}
                 >
                   <HardDriveUpload className="size-4" />
-                  Archivo
+                  {t("local.form.file")}
                 </Button>
               </div>
             </div>
@@ -308,25 +274,27 @@ export function LocalPage() {
                   }
                 />
                 <p className="text-sm text-slate-400">
-                  {fileName ? `Archivo cargado: ${fileName}` : "Carga un archivo con la salida textual del traceroute."}
+                  {fileName
+                    ? t("local.form.loadedFile", { fileName })
+                    : t("local.form.uploadHint")}
                 </p>
               </div>
             ) : null}
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Salida del traceroute</p>
+              <p className="text-sm font-medium text-slate-200">{t("local.form.outputLabel")}</p>
               <Textarea
                 value={rawTrace}
                 onChange={(event) => setRawTrace(event.target.value)}
                 className="min-h-[240px] border-white/10 bg-slate-950/45 text-slate-100 placeholder:text-slate-500"
-                placeholder="Pega aquí la salida completa del traceroute..."
+                placeholder={t("local.form.outputPlaceholder")}
               />
             </div>
 
             {error ? (
               <Alert variant="destructive" className="border-destructive/40 bg-destructive/10">
                 <AlertTriangle className="size-4" />
-                <AlertTitle>No se pudo iniciar el análisis</AlertTitle>
+                <AlertTitle>{t("local.form.errorTitle")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
@@ -336,16 +304,16 @@ export function LocalPage() {
               size="lg"
               onClick={handleAnalyze}
             >
-              Analizar traceroute
+              {t("local.form.analyze")}
             </Button>
           </CardContent>
         </Card>
 
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Consejos rápidos</CardTitle>
+            <CardTitle className="text-white">{t("local.tips.title")}</CardTitle>
             <CardDescription className="text-slate-400">
-              Pequeñas pistas para que el resultado sea más fácil de interpretar.
+              {t("local.tips.description")}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -355,17 +323,10 @@ export function LocalPage() {
                 className="rounded-2xl border border-white/10 bg-slate-950/35 px-4"
               >
                 <AccordionTrigger className="text-white">
-                  Cómo capturar la salida correctamente
+                  {t("local.tips.capture.title")}
                 </AccordionTrigger>
                 <AccordionContent className="space-y-2 pb-4 text-sm text-slate-300">
-                  <p>
-                    Ejecuta el comando en una terminal real y copia el bloque completo,
-                    incluyendo encabezado y saltos.
-                  </p>
-                  <p>
-                    Si tu herramienta devuelve líneas con `* * *`, pégalas también; el
-                    análisis las conservará como saltos sin respuesta.
-                  </p>
+                  <p>{t("local.tips.capture.body")}</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -374,14 +335,10 @@ export function LocalPage() {
                 className="rounded-2xl border border-white/10 bg-slate-950/35 px-4"
               >
                 <AccordionTrigger className="text-white">
-                  Qué pasa con IPs privadas o internas
+                  {t("local.tips.private.title")}
                 </AccordionTrigger>
                 <AccordionContent className="space-y-2 pb-4 text-sm text-slate-300">
-                  <p>
-                    Si un salto usa una IP privada, se conserva en tabla y latencia, pero
-                    no se intenta ubicar en mapa porque no existe una geolocalización
-                    pública fiable para esas direcciones.
-                  </p>
+                  <p>{t("local.tips.private.body")}</p>
                 </AccordionContent>
               </AccordionItem>
 
@@ -390,13 +347,10 @@ export function LocalPage() {
                 className="rounded-2xl border border-white/10 bg-slate-950/35 px-4"
               >
                 <AccordionTrigger className="text-white">
-                  Qué revisar antes de compartir una traza
+                  {t("local.tips.sharing.title")}
                 </AccordionTrigger>
                 <AccordionContent className="space-y-2 pb-4 text-sm text-slate-300">
-                  <p>
-                    Si vas a publicar una captura o un texto, revisa nombres internos,
-                    etiquetas de red o direcciones que prefieras mantener privadas.
-                  </p>
+                  <p>{t("local.tips.sharing.body")}</p>
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -404,12 +358,12 @@ export function LocalPage() {
         </Card>
       </section>
 
-      <Suspense fallback={<ResultsFallback />}>
+      <Suspense fallback={<TraceResultsFallback titleWidth="w-52" />}>
         <TraceResults
           trace={trace}
           resolvingGeo={resolvingGeo}
-          emptyTitle="Todavía no hay resultados locales"
-          emptyDescription="Pega una salida de traceroute o carga un archivo para ver hops, mapa y latencia."
+          emptyTitle={t("local.form.emptyTitle")}
+          emptyDescription={t("local.form.emptyDescription")}
         />
       </Suspense>
     </div>
@@ -422,7 +376,7 @@ async function copyTextToClipboard(text: string) {
   }
 
   if (!navigator.clipboard || !window.isSecureContext) {
-    throw new Error("El navegador no permitió acceder al portapapeles.")
+    throw new Error("Clipboard access is not available.")
   }
 
   try {
@@ -430,7 +384,7 @@ async function copyTextToClipboard(text: string) {
       navigator.clipboard.writeText(text),
       new Promise((_, reject) => {
         window.setTimeout(
-          () => reject(new Error("El portapapeles tardó demasiado en responder.")),
+          () => reject(new Error("Clipboard response timed out.")),
           800,
         )
       }),
@@ -438,7 +392,7 @@ async function copyTextToClipboard(text: string) {
   } catch (clipboardError) {
     throw clipboardError instanceof Error
       ? clipboardError
-      : new Error("El navegador no permitió acceder al portapapeles.")
+      : new Error("Clipboard access is not available.")
   }
 }
 

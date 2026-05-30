@@ -1,4 +1,5 @@
-import { lazy, Suspense, useMemo, useRef, useState } from "react"
+import { lazy, Suspense, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ExternalLink, FileText, Link2, Orbit, Radar } from "lucide-react"
 
 import {
@@ -8,12 +9,10 @@ import {
   type LookingGlassTool,
 } from "@/lib/global-tools"
 import {
-  enrichTraceWithGeo,
-  getSourceLabel,
-  parseTrace,
-  type ParsedTrace,
+  getSourceLabelKey,
   type TraceSource,
 } from "@/lib/traceroute"
+import { useTraceAnalysis } from "@/hooks/use-trace-analysis"
 import { Badge } from "@/components/ui/badge"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -22,14 +21,9 @@ import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { cn } from "@/lib/utils"
+import { TraceResultsFallback } from "@/components/trace-results-fallback"
 
 const parserProfiles: TraceSource[] = ["america", "europa", "asia", "oceania", "linux", "windows"]
-
-const toolStatusLabels: Record<LookingGlassTool["status"], string> = {
-  recommended: "Sugerida",
-  backup: "Alternativa",
-  directory: "Multi-región",
-}
 
 const TraceResults = lazy(() =>
   import("@/components/trace-results").then((module) => ({
@@ -37,21 +31,8 @@ const TraceResults = lazy(() =>
   })),
 )
 
-function ResultsFallback() {
-  return (
-    <Card className="border-white/10 bg-white/5">
-      <CardHeader>
-        <div className="h-6 w-56 animate-pulse rounded-full bg-white/10" />
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <div className="h-28 animate-pulse rounded-2xl bg-white/10" />
-        <div className="h-64 animate-pulse rounded-3xl bg-white/10" />
-      </CardContent>
-    </Card>
-  )
-}
-
 export function GlobalPage() {
+  const { t } = useTranslation()
   const initialTools = getToolsByContinent("america")
   const [continent, setContinent] = useState<ContinentKey>("america")
   const [selectedToolId, setSelectedToolId] = useState<string | null>(
@@ -62,10 +43,7 @@ export function GlobalPage() {
     initialTools[0]?.sourceProfile ?? "linux",
   )
   const [rawTrace, setRawTrace] = useState("")
-  const [trace, setTrace] = useState<ParsedTrace | null>(null)
-  const [resolvingGeo, setResolvingGeo] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const requestIdRef = useRef(0)
+  const { analyzeTrace, error, resolvingGeo, trace } = useTraceAnalysis()
 
   const tools = useMemo(() => getToolsByContinent(continent), [continent])
   const activeTool =
@@ -86,32 +64,11 @@ export function GlobalPage() {
   }
 
   async function handleAnalyze() {
-    setError(null)
-
-    if (!rawTrace.trim()) {
-      setError("Pega el resultado que te devolvió la looking glass antes de analizar.")
-      return
-    }
-
-    const requestId = requestIdRef.current + 1
-    requestIdRef.current = requestId
-
-    const parsed = parseTrace(rawTrace, parserSource)
-    setTrace(parsed)
-
-    if (parsed.hops.length === 0) {
-      return
-    }
-
-    setResolvingGeo(true)
-    const enriched = await enrichTraceWithGeo(parsed)
-
-    if (requestIdRef.current !== requestId) {
-      return
-    }
-
-    setTrace(enriched)
-    setResolvingGeo(false)
+    await analyzeTrace({
+      rawTrace,
+      source: parserSource,
+      emptyMessage: t("global.errors.empty"),
+    })
   }
 
   return (
@@ -121,19 +78,18 @@ export function GlobalPage() {
           <CardHeader className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-cyan-400/15 text-cyan-100 hover:bg-cyan-400/20">
-                Route Global
+                {t("global.badge")}
               </Badge>
               <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                Herramientas públicas
+                {t("global.publicTools")}
               </Badge>
             </div>
             <div>
               <CardTitle className="text-3xl text-white">
-                Compara cómo cambia la ruta desde otras regiones del mundo
+                {t("global.title")}
               </CardTitle>
               <CardDescription className="mt-3 max-w-3xl text-base text-slate-300">
-                Elige un continente, abre una herramienta pública, ejecuta la traza y
-                pega el resultado para verlo con la misma claridad que una ruta local.
+                {t("global.description")}
               </CardDescription>
             </div>
           </CardHeader>
@@ -141,10 +97,9 @@ export function GlobalPage() {
 
         <Alert className="border-white/10 bg-slate-950/45">
           <Orbit className="size-4 text-cyan-300" />
-          <AlertTitle className="text-white">Las herramientas se abren fuera de Uni Route</AlertTitle>
+          <AlertTitle className="text-white">{t("global.externalAlert.title")}</AlertTitle>
           <AlertDescription className="text-slate-300">
-            Muchos servicios públicos no permiten integrarse dentro de otras páginas.
-            Abrirlos en una pestaña nueva es más confiable y respeta sus reglas de uso.
+            {t("global.externalAlert.description")}
           </AlertDescription>
         </Alert>
       </section>
@@ -152,20 +107,19 @@ export function GlobalPage() {
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Herramientas globales</CardTitle>
+            <CardTitle className="text-white">{t("global.toolsTitle")}</CardTitle>
             <CardDescription className="text-slate-400">
-              Selecciona una región de origen y copia el resultado que devuelva la
-              herramienta externa.
+              {t("global.toolsDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Destino a estudiar</p>
+              <p className="text-sm font-medium text-slate-200">{t("global.destinationLabel")}</p>
               <Input
                 value={destination}
                 onChange={(event) => setDestination(event.target.value)}
                 className="border-white/10 bg-slate-950/45 text-slate-100"
-                placeholder="IP o dominio"
+                placeholder={t("global.destinationPlaceholder")}
               />
             </div>
 
@@ -180,17 +134,22 @@ export function GlobalPage() {
                     value={item.key}
                     className="data-active:bg-white data-active:text-slate-950"
                   >
-                    {item.label}
+                    {t(`tools.continents.${item.key}.label`)}
                   </TabsTrigger>
                 ))}
               </TabsList>
 
               {CONTINENTS.map((item) => (
                 <TabsContent key={item.key} value={item.key} className="space-y-4">
-                  <p className="text-sm text-slate-400">{item.summary}</p>
+                  <p className="text-sm text-slate-400">
+                    {t(`tools.continents.${item.key}.summary`)}
+                  </p>
                   <div className="grid gap-4">
                     {getToolsByContinent(item.key).map((tool) => {
                       const selected = tool.id === activeTool?.id
+                      const instructions = t(`tools.items.${tool.id}.instructions`, {
+                        returnObjects: true,
+                      }) as string[]
 
                       return (
                         <Card
@@ -213,23 +172,23 @@ export function GlobalPage() {
                                   variant="outline"
                                   className="border-white/10 bg-white/5 text-slate-300"
                                 >
-                                  {toolStatusLabels[tool.status]}
+                                  {t(`global.status.${tool.status}`)}
                                 </Badge>
                                 <Badge
                                   variant="outline"
                                   className="border-emerald-400/20 bg-emerald-400/10 text-emerald-100"
                                 >
-                                  {getSourceLabel(tool.sourceProfile)}
+                                  {t(getSourceLabelKey(tool.sourceProfile))}
                                 </Badge>
                               </div>
                             </div>
                             <CardDescription className="text-slate-300">
-                              {tool.notes}
+                              {t(`tools.items.${tool.id}.notes`)}
                             </CardDescription>
                           </CardHeader>
                           <CardContent className="space-y-4">
                             <div className="space-y-2 text-sm text-slate-300">
-                              {tool.instructions.map((step) => (
+                              {instructions.map((step) => (
                                 <p key={step}>• {step}</p>
                               ))}
                             </div>
@@ -244,7 +203,7 @@ export function GlobalPage() {
                                 )}
                               >
                                 <ExternalLink className="size-4" />
-                                Abrir herramienta
+                                {t("global.openTool")}
                               </a>
                               <Button
                                 variant={selected ? "default" : "outline"}
@@ -256,7 +215,7 @@ export function GlobalPage() {
                                 )}
                                 onClick={() => handleToolSelect(tool)}
                               >
-                                Usar este perfil
+                                {t("global.useProfile")}
                               </Button>
                             </div>
                           </CardContent>
@@ -272,10 +231,9 @@ export function GlobalPage() {
 
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Pega el resultado</CardTitle>
+            <CardTitle className="text-white">{t("global.pasteTitle")}</CardTitle>
             <CardDescription className="text-slate-400">
-              Uni Route intentará leerlo con el formato sugerido. Si no encaja, prueba
-              otro formato de la lista.
+              {t("global.pasteDescription")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -283,17 +241,17 @@ export function GlobalPage() {
               <div className="rounded-2xl border border-white/10 bg-slate-950/35 p-4 text-sm text-slate-300">
                 <div className="flex items-center gap-2 font-medium text-white">
                   <Radar className="size-4 text-cyan-300" />
-                  Herramienta activa: {activeTool.name}
+                  {t("global.activeTool", { name: activeTool.name })}
                 </div>
                 <p className="mt-2">
-                  Destino sugerido para copiar en la herramienta externa:{" "}
+                  {t("global.suggestedDestination")}{" "}
                   <span className="font-mono text-cyan-200">{destination || "github.com"}</span>
                 </p>
               </div>
             ) : null}
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Formato del resultado</p>
+              <p className="text-sm font-medium text-slate-200">{t("global.resultFormat")}</p>
               <div className="flex flex-wrap gap-2">
                 {parserProfiles.map((profile) => (
                   <Button
@@ -307,26 +265,26 @@ export function GlobalPage() {
                     )}
                     onClick={() => setParserSource(profile)}
                   >
-                    {getSourceLabel(profile)}
+                    {t(getSourceLabelKey(profile))}
                   </Button>
                 ))}
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Resultado bruto</p>
+              <p className="text-sm font-medium text-slate-200">{t("global.rawResult")}</p>
               <Textarea
                 value={rawTrace}
                 onChange={(event) => setRawTrace(event.target.value)}
                 className="min-h-[260px] border-white/10 bg-slate-950/45 text-slate-100 placeholder:text-slate-500"
-                placeholder="Pega aquí la salida textual de la looking glass..."
+                placeholder={t("global.rawPlaceholder")}
               />
             </div>
 
             {error ? (
               <Alert className="border-destructive/40 bg-destructive/10">
                 <FileText className="size-4" />
-                <AlertTitle>No se pudo iniciar el análisis global</AlertTitle>
+                <AlertTitle>{t("global.errorTitle")}</AlertTitle>
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             ) : null}
@@ -337,7 +295,7 @@ export function GlobalPage() {
                 className="min-h-11 bg-emerald-400 text-slate-950 transition-transform duration-200 ease-out hover:bg-emerald-300 active:scale-[0.96]"
                 onClick={handleAnalyze}
               >
-                Analizar salida global
+                {t("global.analyze")}
               </Button>
               {activeTool ? (
                 <a
@@ -350,7 +308,7 @@ export function GlobalPage() {
                   )}
                 >
                   <Link2 className="size-4" />
-                  Reabrir herramienta
+                  {t("global.reopenTool")}
                 </a>
               ) : null}
             </div>
@@ -358,12 +316,12 @@ export function GlobalPage() {
         </Card>
       </section>
 
-      <Suspense fallback={<ResultsFallback />}>
+      <Suspense fallback={<TraceResultsFallback />}>
         <TraceResults
           trace={trace}
           resolvingGeo={resolvingGeo}
-          emptyTitle="Todavía no hay resultados globales"
-          emptyDescription="Abre una looking glass, ejecuta traceroute desde el continente deseado y pega aquí la salida para comparar regiones."
+          emptyTitle={t("global.emptyTitle")}
+          emptyDescription={t("global.emptyDescription")}
         />
       </Suspense>
     </div>

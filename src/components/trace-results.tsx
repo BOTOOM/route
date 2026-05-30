@@ -1,11 +1,14 @@
 import { lazy, Suspense, useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import { Activity, Globe2, MapPinned, Route, TimerReset } from "lucide-react"
 
 import {
-  formatGeoStatus,
-  getSourceLabel,
+  getGeoStatusKey,
+  getSourceLabelKey,
   getTraceMetrics,
+  type GeoLookup,
   type ParsedTrace,
+  type TraceWarning,
 } from "@/lib/traceroute"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -31,12 +34,12 @@ const TraceLatencyCard = lazy(() =>
   })),
 )
 
-function statusVariant(status: string) {
-  if (status === "Resuelta") {
+function statusVariant(status: GeoLookup["status"] | undefined) {
+  if (status === "resolved") {
     return "default"
   }
 
-  if (status === "Privada") {
+  if (status === "private") {
     return "secondary"
   }
 
@@ -91,6 +94,10 @@ function VisualizationFallback() {
   return <Skeleton className="h-[520px] rounded-3xl bg-white/10" />
 }
 
+function warningTranslationKey(warning: TraceWarning) {
+  return `traceroute.warnings.${warning.code}`
+}
+
 export function TraceResults({
   trace,
   resolvingGeo,
@@ -102,6 +109,7 @@ export function TraceResults({
   emptyTitle: string
   emptyDescription: string
 }) {
+  const { t } = useTranslation()
   const metrics = useMemo(() => (trace ? getTraceMetrics(trace) : null), [trace])
 
   if (!trace) {
@@ -113,52 +121,52 @@ export function TraceResults({
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
           icon={Route}
-          label="Saltos"
+          label={t("results.metrics.hops.label")}
           value={`${metrics?.totalHops ?? 0}`}
-          description="Número total de hops detectados en la salida pegada."
+          description={t("results.metrics.hops.description")}
         />
         <MetricCard
           icon={TimerReset}
-          label="Latencia media"
+          label={t("results.metrics.averageLatency.label")}
           value={
             metrics?.averageLatencyMs !== null &&
             metrics?.averageLatencyMs !== undefined
               ? `${metrics.averageLatencyMs} ms`
-              : "Sin datos"
+              : t("common.noData")
           }
-          description="Promedio calculado con las muestras encontradas en cada salto."
+          description={t("results.metrics.averageLatency.description")}
         />
         <MetricCard
           icon={Globe2}
-          label="IPs públicas"
+          label={t("results.metrics.publicIps.label")}
           value={`${metrics?.publicHops ?? 0}`}
-          description="Saltos con IP pública candidata para geolocalización."
+          description={t("results.metrics.publicIps.description")}
         />
         <MetricCard
           icon={MapPinned}
-          label="Puntos en mapa"
+          label={t("results.metrics.mapPoints.label")}
           value={`${metrics?.resolvedGeoHops ?? 0}`}
-          description="Saltos que sí terminaron con coordenadas utilizables."
+          description={t("results.metrics.mapPoints.description")}
         />
       </div>
 
       <Card className="border-white/10 bg-white/5">
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
-            <CardTitle className="text-white">Resumen del análisis</CardTitle>
+            <CardTitle className="text-white">{t("results.summary.title")}</CardTitle>
             <Badge variant="outline" className="border-cyan-400/20 bg-cyan-400/10 text-cyan-200">
-              {getSourceLabel(trace.source)}
+              {t(getSourceLabelKey(trace.source))}
             </Badge>
             {resolvingGeo && (
               <Badge variant="outline" className="border-amber-400/20 bg-amber-400/10 text-amber-200">
-                Resolviendo geodatos...
+                {t("results.summary.resolving")}
               </Badge>
             )}
           </div>
           <CardDescription className="text-slate-400">
-            Destino detectado:{" "}
+            {t("results.summary.destination")}{" "}
             <span className="font-medium text-slate-200">
-              {metrics?.finalDestination ?? "No identificado"}
+              {metrics?.finalDestination ?? t("common.unknown")}
             </span>
           </CardDescription>
         </CardHeader>
@@ -166,12 +174,12 @@ export function TraceResults({
           {trace.warnings.length > 0 && (
             <Alert className="border-amber-400/20 bg-amber-400/10 text-amber-100">
               <Activity className="size-4" />
-              <AlertTitle>Observaciones del análisis</AlertTitle>
+              <AlertTitle>{t("results.summary.warnings")}</AlertTitle>
               <AlertDescription>
                 <ul className="space-y-1 pl-4">
                   {trace.warnings.map((warning) => (
-                    <li key={warning} className="list-disc">
-                      {warning}
+                    <li key={`${warning.code}-${"count" in warning ? warning.count : 0}`} className="list-disc">
+                      {t(warningTranslationKey(warning), warning)}
                     </li>
                   ))}
                 </ul>
@@ -200,7 +208,7 @@ export function TraceResults({
               ))
             ) : (
               <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-400">
-                Todavía no hay países resueltos
+                {t("results.summary.noCountries")}
               </Badge>
             )}
           </div>
@@ -218,22 +226,22 @@ export function TraceResults({
 
       <Card className="border-white/10 bg-white/5">
         <CardHeader>
-          <CardTitle className="text-white">Tabla de hops</CardTitle>
+          <CardTitle className="text-white">{t("results.table.title")}</CardTitle>
           <CardDescription className="text-slate-400">
-            Resultado normalizado para comparar IP, host, latencia y estado geográfico.
+            {t("results.table.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
             <TableHeader>
               <TableRow className="border-white/10">
-                <TableHead className="text-slate-300">Hop</TableHead>
-                <TableHead className="text-slate-300">IP</TableHead>
-                <TableHead className="text-slate-300">Host</TableHead>
-                <TableHead className="text-slate-300">Latencia</TableHead>
-                <TableHead className="text-slate-300">Estado geo</TableHead>
-                <TableHead className="text-slate-300">Ubicación</TableHead>
-                <TableHead className="text-slate-300">Red</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.hop")}</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.ip")}</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.host")}</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.latency")}</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.geoStatus")}</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.location")}</TableHead>
+                <TableHead className="text-slate-300">{t("results.table.network")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -241,7 +249,10 @@ export function TraceResults({
                 const location = [hop.geo?.city, hop.geo?.country]
                   .filter(Boolean)
                   .join(", ")
-                const geoStatus = formatGeoStatus(hop.geo)
+                const geoStatus = t(getGeoStatusKey(hop.geo))
+                const geoMessage = hop.geo?.messageKey
+                  ? t(`traceroute.geoMessages.${hop.geo.messageKey}`, hop.geo.messageParams)
+                  : hop.geo?.message
 
                 return (
                   <TableRow key={hop.id} className="border-white/10">
@@ -250,24 +261,24 @@ export function TraceResults({
                       {hop.ip ?? "***"}
                     </TableCell>
                     <TableCell className="max-w-60 truncate text-slate-300">
-                      {hop.host ?? "Sin hostname"}
+                      {hop.host ?? t("common.unavailableHostname")}
                     </TableCell>
                     <TableCell className="text-slate-200">
                       {hop.latencyMs !== null ? `${hop.latencyMs} ms` : "***"}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        variant={statusVariant(geoStatus)}
+                        variant={statusVariant(hop.geo?.status)}
                         className="border-white/10 bg-white/5 text-slate-200"
                       >
                         {geoStatus}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-slate-300">
-                      {location || hop.geo?.message || "Sin ubicación"}
+                      {location || geoMessage || t("results.table.noLocation")}
                     </TableCell>
                     <TableCell className="max-w-60 truncate text-slate-300">
-                      {hop.geo?.organization || hop.geo?.isp || "Sin organización"}
+                      {hop.geo?.organization || hop.geo?.isp || t("common.unavailableOrganization")}
                     </TableCell>
                   </TableRow>
                 )

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { MapPinned, Pause, Play, RotateCcw } from "lucide-react"
 
 import { getMapCenter, getMapHops, getRouteCoordinates, type ParsedTrace } from "@/lib/traceroute"
@@ -33,6 +34,7 @@ export function TraceMapCard({ trace }: { trace: ParsedTrace }) {
 }
 
 function TraceMapCardContent({ trace }: { trace: ParsedTrace }) {
+  const { t } = useTranslation()
   const mapHops = useMemo(() => getMapHops(trace), [trace])
   const routeCoordinates = useMemo(() => getRouteCoordinates(trace), [trace])
   const routeSegments = useMemo(() => createRouteSegments(routeCoordinates), [routeCoordinates])
@@ -219,10 +221,9 @@ function TraceMapCardContent({ trace }: { trace: ParsedTrace }) {
     <Card className="border-white/10 bg-white/5">
       <CardHeader className="gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1.5">
-          <CardTitle className="text-balance text-white">Trayectoria geográfica</CardTitle>
+          <CardTitle className="text-balance text-white">{t("map.title")}</CardTitle>
           <CardDescription className="text-pretty text-slate-400">
-            Se dibuja solo con hops que lograron resolver coordenadas. Usa la reproducción
-            para ver cómo la ruta avanza según la latencia de cada salto.
+            {t("map.description")}
           </CardDescription>
         </div>
         <div className="flex flex-col items-start gap-2 sm:items-end">
@@ -231,15 +232,15 @@ function TraceMapCardContent({ trace }: { trace: ParsedTrace }) {
             onClick={handlePlaybackAction}
             disabled={!canPlay}
             className="min-h-10 rounded-xl bg-emerald-300 px-4 text-slate-950 shadow-lg shadow-emerald-500/20 transition-transform hover:bg-emerald-200 active:scale-[0.96] disabled:bg-white/10 disabled:text-slate-500"
-            aria-label={playbackAction.ariaLabel}
+            aria-label={t(playbackAction.ariaLabelKey)}
           >
             <playbackAction.Icon className="size-4" />
-            {playbackAction.label}
+            {t(playbackAction.labelKey)}
           </Button>
           <span className="max-w-60 text-xs text-pretty text-slate-500 sm:text-right">
             {canPlay
-              ? "La velocidad es una escala visual de la latencia, no tiempo real."
-              : "Se necesitan al menos dos puntos con coordenadas para reproducir."}
+              ? t("map.scaleNote")
+              : t("map.needPoints")}
           </span>
         </div>
       </CardHeader>
@@ -249,20 +250,20 @@ function TraceMapCardContent({ trace }: { trace: ParsedTrace }) {
             {canPlay ? (
               <div className="pointer-events-none absolute left-3 top-3 z-10 max-w-[calc(100%-1.5rem)] rounded-2xl bg-slate-950/80 p-3 text-white shadow-2xl shadow-slate-950/30 ring-1 ring-white/10 backdrop-blur-md sm:max-w-xs">
                 <p className="text-xs font-medium uppercase tracking-[0.2em] text-cyan-200">
-                  {getPlaybackStatusLabel(playbackState)}
+                  {t(getPlaybackStatusKey(playbackState))}
                 </p>
                 <p className="mt-1 text-sm font-semibold">
                   {activePlaybackHop
-                    ? `Salto ${activePlaybackHop.hop}`
-                    : "Ruta lista"}
+                    ? t("map.hop", { hop: activePlaybackHop.hop })
+                    : t("map.ready")}
                 </p>
                 <p className="mt-0.5 text-xs text-pretty text-slate-300">
-                  {activePlaybackHop?.location || activePlaybackHop?.ip || "Punto geográfico resuelto"}
+                  {activePlaybackHop?.location || activePlaybackHop?.ip || t("map.resolvedPoint")}
                 </p>
                 <p className="mt-2 text-xs tabular-nums text-emerald-200">
                   {activePlaybackHop?.latencyMs !== null && activePlaybackHop?.latencyMs !== undefined
                     ? `${activePlaybackHop.latencyMs} ms`
-                    : "Latencia no disponible"}
+                    : t("map.noLatency")}
                 </p>
               </div>
             ) : null}
@@ -311,12 +312,14 @@ function TraceMapCardContent({ trace }: { trace: ParsedTrace }) {
                   </MarkerContent>
                   <MarkerPopup closeButton>
                     <div className="space-y-1">
-                      <p className="font-medium text-slate-900 dark:text-white">Salto {hop.hop}</p>
-                      <p className="text-xs text-slate-600 dark:text-slate-300">
-                        {hop.location || "Ubicación no disponible"}
+                      <p className="font-medium text-slate-900 dark:text-white">
+                        {t("map.hop", { hop: hop.hop })}
                       </p>
                       <p className="text-xs text-slate-600 dark:text-slate-300">
-                        {hop.ip ?? "Sin IP"}
+                        {hop.location || t("common.unavailableLocation")}
+                      </p>
+                      <p className="text-xs text-slate-600 dark:text-slate-300">
+                        {hop.ip ?? t("common.missingIp")}
                       </p>
                       {hop.organization ? (
                         <p className="text-xs text-slate-600 dark:text-slate-300">
@@ -332,11 +335,8 @@ function TraceMapCardContent({ trace }: { trace: ParsedTrace }) {
         ) : (
           <Alert className="border-white/10 bg-slate-950/50">
             <MapPinned className="size-4" />
-            <AlertTitle>Mapa pendiente</AlertTitle>
-            <AlertDescription>
-              No hubo suficientes hops con coordenadas. Si el resultado usa IPs
-              privadas o la API no responde, el análisis textual sigue siendo útil.
-            </AlertDescription>
+            <AlertTitle>{t("map.pendingTitle")}</AlertTitle>
+            <AlertDescription>{t("map.pendingDescription")}</AlertDescription>
           </Alert>
         )}
       </CardContent>
@@ -348,62 +348,62 @@ function getPlaybackAction(playbackState: PlaybackState, prefersReducedMotion: b
   if (prefersReducedMotion) {
     return playbackState === "complete"
       ? {
-          label: "Reiniciar",
-          ariaLabel: "Reiniciar recorrido de la ruta",
+          labelKey: "map.actions.restart",
+          ariaLabelKey: "map.actions.restartAria",
           Icon: RotateCcw,
         }
       : {
-          label: "Mostrar ruta",
-          ariaLabel: "Mostrar recorrido completo de la ruta",
+          labelKey: "map.actions.show",
+          ariaLabelKey: "map.actions.showAria",
           Icon: Play,
         }
   }
 
   if (playbackState === "playing") {
     return {
-      label: "Pausar",
-      ariaLabel: "Pausar reproducción de la ruta",
+      labelKey: "map.actions.pause",
+      ariaLabelKey: "map.actions.pauseAria",
       Icon: Pause,
     }
   }
 
   if (playbackState === "paused") {
     return {
-      label: "Continuar",
-      ariaLabel: "Continuar reproducción de la ruta",
+      labelKey: "map.actions.resume",
+      ariaLabelKey: "map.actions.resumeAria",
       Icon: Play,
     }
   }
 
   if (playbackState === "complete") {
     return {
-      label: "Repetir",
-      ariaLabel: "Reproducir otra vez la ruta",
+      labelKey: "map.actions.repeat",
+      ariaLabelKey: "map.actions.repeatAria",
       Icon: RotateCcw,
     }
   }
 
   return {
-    label: "Reproducir",
-    ariaLabel: "Reproducir ruta geográfica",
+    labelKey: "map.actions.play",
+    ariaLabelKey: "map.actions.playAria",
     Icon: Play,
   }
 }
 
-function getPlaybackStatusLabel(playbackState: PlaybackState) {
+function getPlaybackStatusKey(playbackState: PlaybackState) {
   if (playbackState === "playing") {
-    return "En movimiento"
+    return "map.status.moving"
   }
 
   if (playbackState === "paused") {
-    return "Pausado"
+    return "map.status.paused"
   }
 
   if (playbackState === "complete") {
-    return "Recorrido completo"
+    return "map.status.complete"
   }
 
-  return "Listo para reproducir"
+  return "map.status.ready"
 }
 
 function usePrefersReducedMotion() {

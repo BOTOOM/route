@@ -1,4 +1,5 @@
 import { useMemo } from "react"
+import { useTranslation } from "react-i18next"
 import {
   CartesianGrid,
   Line,
@@ -15,14 +16,15 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 
 export function TraceLatencyCard({ trace }: { trace: ParsedTrace }) {
+  const { t } = useTranslation()
   const chartData = useMemo(() => getChartData(trace), [trace])
 
   return (
     <Card className="border-white/10 bg-white/5">
       <CardHeader>
-        <CardTitle className="text-white">Latencia por salto</CardTitle>
+        <CardTitle className="text-white">{t("results.latency.title")}</CardTitle>
         <CardDescription className="text-slate-400">
-          Visualiza cómo cambia la latencia a medida que avanza la ruta.
+          {t("results.latency.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -58,11 +60,8 @@ export function TraceLatencyCard({ trace }: { trace: ParsedTrace }) {
         ) : (
           <Alert className="border-white/10 bg-slate-950/50">
             <TimerReset className="size-4" />
-            <AlertTitle>Sin muestras de latencia</AlertTitle>
-            <AlertDescription>
-              El resultado no incluyó tiempos en milisegundos suficientes para dibujar
-              la gráfica.
-            </AlertDescription>
+            <AlertTitle>{t("results.latency.emptyTitle")}</AlertTitle>
+            <AlertDescription>{t("results.latency.emptyDescription")}</AlertDescription>
           </Alert>
         )}
       </CardContent>
