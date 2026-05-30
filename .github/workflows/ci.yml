@@ -52,6 +52,7 @@ jobs:
       - name: Build app
         run: pnpm build
         env:
+          VITE_IPINFO_TOKEN: ${{ secrets.VITE_IPINFO_TOKEN }}
           VITE_IPGEOLOCATION_API_KEY: ${{ secrets.VITE_IPGEOLOCATION_API_KEY }}
 
       - name: Upload Pages artifact
