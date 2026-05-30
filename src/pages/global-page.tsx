@@ -25,6 +25,12 @@ import { cn } from "@/lib/utils"
 
 const parserProfiles: TraceSource[] = ["america", "europa", "asia", "oceania", "linux", "windows"]
 
+const toolStatusLabels: Record<LookingGlassTool["status"], string> = {
+  recommended: "Sugerida",
+  backup: "Alternativa",
+  directory: "Multi-región",
+}
+
 const TraceResults = lazy(() =>
   import("@/components/trace-results").then((module) => ({
     default: module.TraceResults,
@@ -118,7 +124,7 @@ export function GlobalPage() {
                 Route Global
               </Badge>
               <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                Looking glasses por continente
+                Herramientas públicas
               </Badge>
             </div>
             <div>
@@ -126,9 +132,8 @@ export function GlobalPage() {
                 Compara cómo cambia la ruta desde otras regiones del mundo
               </CardTitle>
               <CardDescription className="mt-3 max-w-3xl text-base text-slate-300">
-                Mantiene el espíritu del modo global original, pero ahora con catálogo
-                más curado, explicación por continente y parser configurable cuando la
-                salida del tercero cambia.
+                Elige un continente, abre una herramienta pública, ejecuta la traza y
+                pega el resultado para verlo con la misma claridad que una ruta local.
               </CardDescription>
             </div>
           </CardHeader>
@@ -136,11 +141,10 @@ export function GlobalPage() {
 
         <Alert className="border-white/10 bg-slate-950/45">
           <Orbit className="size-4 text-cyan-300" />
-          <AlertTitle className="text-white">Sobre el iframe</AlertTitle>
+          <AlertTitle className="text-white">Las herramientas se abren fuera de Uni Route</AlertTitle>
           <AlertDescription className="text-slate-300">
-            La mayoría de looking glasses públicas bloquean iframes por CSP o
-            `X-Frame-Options`. Por eso el flujo confiable sigue siendo abrir en nueva
-            pestaña, correr traceroute allí y pegar el resultado acá.
+            Muchos servicios públicos no permiten integrarse dentro de otras páginas.
+            Abrirlos en una pestaña nueva es más confiable y respeta sus reglas de uso.
           </AlertDescription>
         </Alert>
       </section>
@@ -150,8 +154,8 @@ export function GlobalPage() {
           <CardHeader>
             <CardTitle className="text-white">Herramientas globales</CardTitle>
             <CardDescription className="text-slate-400">
-              Selecciona un continente, abre una herramienta HTTPS y luego pega su salida
-              textual para normalizarla.
+              Selecciona una región de origen y copia el resultado que devuelva la
+              herramienta externa.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -209,7 +213,7 @@ export function GlobalPage() {
                                   variant="outline"
                                   className="border-white/10 bg-white/5 text-slate-300"
                                 >
-                                  {tool.status}
+                                  {toolStatusLabels[tool.status]}
                                 </Badge>
                                 <Badge
                                   variant="outline"
@@ -268,10 +272,10 @@ export function GlobalPage() {
 
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Pegar salida y normalizar</CardTitle>
+            <CardTitle className="text-white">Pega el resultado</CardTitle>
             <CardDescription className="text-slate-400">
-              Usa el parser sugerido por la herramienta, o cámbialo si el formato que
-              pegaste se parece más a otro perfil.
+              Uni Route intentará leerlo con el formato sugerido. Si no encaja, prueba
+              otro formato de la lista.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
@@ -289,7 +293,7 @@ export function GlobalPage() {
             ) : null}
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Perfil de parser</p>
+              <p className="text-sm font-medium text-slate-200">Formato del resultado</p>
               <div className="flex flex-wrap gap-2">
                 {parserProfiles.map((profile) => (
                   <Button
@@ -330,7 +334,7 @@ export function GlobalPage() {
             <div className="flex flex-wrap gap-2">
               <Button
                 size="lg"
-                className="bg-emerald-400 text-slate-950 hover:bg-emerald-300"
+                className="min-h-11 bg-emerald-400 text-slate-950 transition-transform duration-200 ease-out hover:bg-emerald-300 active:scale-[0.96]"
                 onClick={handleAnalyze}
               >
                 Analizar salida global
