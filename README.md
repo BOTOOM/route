@@ -1,6 +1,17 @@
 # Uni Route
 
-Aplicación web para analizar traceroutes locales y globales con una interfaz moderna, mapas, gráficas de latencia y un parser más robusto que el proyecto Angular original.
+Uni Route es una aplicación web educativa para aprender cómo viajan los paquetes por internet usando salidas reales de `tracert` y `traceroute`. Permite pegar resultados locales, comparar trazas desde herramientas públicas globales, ver saltos geográficos aproximados, revisar latencia por hop y reproducir la ruta en el mapa con una velocidad visual basada en la latencia.
+
+Este repositorio es un **refactor completo** de la primera versión hecha en Angular. La aplicación activa ahora vive en `src/` y fue reconstruida como una SPA moderna con React, TypeScript y Vite para publicarse en GitHub Pages. La versión anterior se conserva solo como referencia histórica en `legacy/angular-route/`.
+
+## Funcionalidades principales
+
+- **Route Local:** copia un comando sugerido para Windows, Linux o macOS, ejecuta la traza en tu equipo y pega o carga la salida.
+- **Route Global:** abre looking glasses públicas por continente, ejecuta traceroute desde otras regiones y compara los resultados.
+- **Parser compartido:** normaliza salidas Windows y Unix-like para obtener destino, hops, IPs, muestras de latencia y advertencias.
+- **Geolocalización responsable:** evita llamadas para IPs privadas, reservadas o no geolocalizables antes de consultar APIs externas.
+- **Visualización educativa:** mapa, tabla, gráfica de latencia y reproducción animada de la ruta salto por salto.
+- **Despliegue moderno:** GitHub Actions genera el build estático y lo publica en GitHub Pages desde `master`.
 
 ## Stack
 
@@ -9,30 +20,42 @@ Aplicación web para analizar traceroutes locales y globales con una interfaz mo
 - shadcn/ui
 - mapcn + MapLibre
 - Recharts
-- Vitest
-
-## Qué incluye esta modernización
-
-- `Route Local` para pegar o cargar salidas de `tracert` y `traceroute`
-- `Route Global` con catálogo curado de looking glasses por continente
-- normalización tipada de hops, IPs, latencias y estados geo
-- mapas y visualización de latencia desacoplados y cargados bajo demanda
-- despliegue estático a GitHub Pages desde GitHub Actions
-- preservación del proyecto anterior en `legacy/angular-route/`
+- Zod
+- Vitest + Testing Library
+- GitHub Actions + GitHub Pages
 
 ## Requisitos
 
 - Node.js 22+
 - pnpm 10+
 
-## Desarrollo local
+## Instalación y desarrollo
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-La aplicación quedará disponible en `http://localhost:5173/route/`.
+La aplicación local queda disponible en `http://localhost:5173/route/`.
+
+## Variables de entorno
+
+Las variables son opcionales, pero recomendadas si quieres más cuota y estabilidad en geolocalización. Copia el ejemplo y completa los valores que vayas a usar:
+
+```bash
+cp .env.example .env.local
+```
+
+Variables disponibles:
+
+| Variable | Uso | Dónde obtenerla |
+| --- | --- | --- |
+| `VITE_IPINFO_TOKEN` | Proveedor recomendado por su free tier amplio para consultas desde cliente. | Crea cuenta en <https://ipinfo.io/> y copia el token desde <https://ipinfo.io/account/token>. |
+| `VITE_IPGEOLOCATION_API_KEY` | Proveedor secundario si prefieres ipgeolocation.io. | Crea cuenta en <https://ipgeolocation.io/> y copia la key desde <https://app.ipgeolocation.io/>. |
+
+Orden de uso: IPinfo si `VITE_IPINFO_TOKEN` existe, luego ipgeolocation.io si `VITE_IPGEOLOCATION_API_KEY` existe, y finalmente `ipapi.co` sin API key como fallback compatible con navegador.
+
+Antes de llamar a cualquier proveedor, Uni Route clasifica rangos privados, loopback, link-local, CGNAT, documentación, benchmarking, multicast y reservados para conservar la cuota de APIs.
 
 ## Scripts
 
@@ -45,57 +68,67 @@ pnpm build
 pnpm preview
 ```
 
-## Variables de entorno
+## Cómo usar Route Local
 
-Crea un `.env.local` opcional si quieres usar `ipgeolocation.io` como proveedor principal:
+El navegador no puede ejecutar traceroute nativo por seguridad, así que Uni Route muestra el comando adecuado y un botón **Copiar**.
 
-```bash
-VITE_IPGEOLOCATION_API_KEY=tu_api_key
+En Windows:
+
+```powershell
+tracert github.com
 ```
 
-Si no se configura, la app usa `ipwho.is` como fallback público.
+En Linux o macOS:
 
-## Cómo usar la app
+```bash
+traceroute github.com
+```
 
-### Route Local
+Después de ejecutar el comando, copia la salida completa, incluyendo encabezado, hops con `* * *` y líneas finales. Pega el texto en Route Local o carga un archivo `.txt`, selecciona el sistema operativo correcto y analiza la traza.
 
-1. Ejecuta `tracert dominio.com` en Windows o `traceroute dominio.com` en Linux/macOS.
-2. Copia la salida completa o carga un archivo `.txt`.
-3. Elige el perfil correcto y analiza el resultado.
+## Cómo usar Route Global
 
-### Route Global
+1. Entra a Route Global y elige un continente.
+2. Abre una herramienta pública de looking glass.
+3. Ejecuta traceroute contra el dominio o IP que quieras estudiar.
+4. Copia el bloque de resultado y pégalo en Uni Route.
+5. Revisa mapa, tabla, latencia y reproducción de la ruta.
 
-1. Abre una looking glass desde el continente que quieras estudiar.
-2. Ejecuta traceroute contra tu destino.
-3. Pega el resultado bruto en la app para normalizarlo y compararlo.
+Las herramientas externas se abren en una pestaña nueva porque muchos servicios públicos bloquean iframes mediante CSP o `X-Frame-Options`.
 
-## Limitaciones conocidas
+## Despliegue en GitHub Pages
 
-- El navegador no puede ejecutar traceroute nativo del sistema operativo del usuario.
-- Por eso el flujo web actual usa copiar/pegar o archivo; un helper/CLI local quedaría como fase futura.
-- Muchas looking glasses bloquean iframes por CSP o `X-Frame-Options`, así que el flujo principal abre herramientas en una nueva pestaña.
-- La resolución geográfica depende de APIs públicas y su disponibilidad.
-
-## Despliegue
-
-El repositorio publica la SPA en GitHub Pages desde la rama `master` usando artifacts de GitHub Actions. La configuración de Vite ya usa la base correcta:
+La SPA se publica en `https://botoom.github.io/route/`. La base de Vite y el basename del router deben mantenerse alineados con `/route/`.
 
 ```ts
 base: "/route/"
 ```
 
-Para habilitar Pages en GitHub:
+Para desplegar:
 
-1. Activa **Settings → Pages → Build and deployment → GitHub Actions**.
-2. Opcionalmente crea el secret `VITE_IPGEOLOCATION_API_KEY`.
-3. Haz push a `master`.
+1. Configura **Settings → Pages → Build and deployment → GitHub Actions**.
+2. Opcionalmente agrega los secrets `VITE_IPINFO_TOKEN` y `VITE_IPGEOLOCATION_API_KEY`.
+3. Haz push a `master`; el workflow construye y publica el artifact de Pages.
 
 ## Estructura relevante
 
 ```text
-legacy/angular-route/   # referencia histórica del proyecto Angular
-src/lib/traceroute.ts   # dominio de parsing, geodatos y métricas
-src/lib/global-tools.ts # catálogo de looking glasses
-src/pages/              # Home, Local, Global y 404
-src/components/         # layout, resultados, mapa y gráfica
+src/                      # aplicación React activa
+src/lib/traceroute.ts     # parsing, geolocalización, métricas y datos derivados
+src/lib/global-tools.ts   # catálogo de looking glasses por continente
+src/components/           # layout, resultados, mapa, gráfica y UI compartida
+src/pages/                # páginas Home, Local, Global, Recursos y 404
+legacy/angular-route/     # primera versión Angular conservada como referencia
+.github/workflows/ci.yml  # lint, tests, build y despliegue a Pages
 ```
+
+## Estado del refactor
+
+La modernización reemplaza el frontend Angular por una arquitectura React estática, conserva el objetivo educativo original y mejora la experiencia con diseño responsive, parser tipado, visualizaciones, animaciones y despliegue continuo. El código Angular legacy no es la fuente de verdad para nuevas funcionalidades.
+
+## Créditos legacy
+
+La primera versión legacy del proyecto fue creada por los estudiantes:
+
+- Edwar Diaz Ruiz
+- Daissi Bibiana Gonzalez Roldan
