@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from "react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useLocation } from "react-router-dom"
 import { Globe2, Menu, Route, ScanSearch } from "lucide-react"
 
 import { cn } from "@/lib/utils"
@@ -17,7 +17,7 @@ const navigation = [
   {
     to: "/",
     label: "Inicio",
-    description: "Resumen del proyecto y estrategia de uso",
+    description: "Empieza rápido y aprende mejor",
   },
   {
     to: "/local",
@@ -29,12 +29,20 @@ const navigation = [
     label: "Route Global",
     description: "Compara rutas desde otras regiones",
   },
+  {
+    to: "/resources",
+    label: "Uso responsable",
+    description: "Buenas prácticas y créditos necesarios",
+  },
 ]
 
 function navClassName(active: boolean) {
   return cn(
-    buttonVariants({ variant: active ? "default" : "ghost", size: "sm" }),
-    "justify-start",
+    buttonVariants({ variant: "ghost", size: "sm" }),
+    "min-h-10 justify-start transition-transform duration-200 ease-out active:scale-[0.96]",
+    active
+      ? "bg-emerald-400 text-slate-950 shadow-[0_12px_30px_rgba(16,185,129,0.24)] hover:bg-emerald-300 hover:text-slate-950"
+      : "text-slate-100 hover:bg-white/10 hover:text-white",
   )
 }
 
@@ -70,6 +78,8 @@ function NavigationLinks({
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false)
+  const location = useLocation()
+  const isLanding = location.pathname === "/"
 
   return (
     <div className="min-h-screen text-slate-100">
@@ -84,7 +94,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 Uni Route
               </NavLink>
               <p className="truncate text-xs text-slate-400">
-                Traceroute moderno para análisis local, global y educativo
+                Visualiza rutas, latencia y saltos de red
               </p>
             </div>
           </div>
@@ -124,7 +134,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SheetHeader className="border-b border-white/10">
                 <SheetTitle>Uni Route</SheetTitle>
                 <SheetDescription className="text-slate-400">
-                  Analiza rutas locales y globales desde una interfaz moderna.
+                  Analiza rutas locales y globales desde una vista clara.
                 </SheetDescription>
               </SheetHeader>
               <div className="space-y-6 p-4">
@@ -147,25 +157,51 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      <main className="mx-auto flex max-w-7xl flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8">
+      <main
+        className={cn(
+          isLanding
+            ? "flex flex-col"
+            : "mx-auto flex max-w-7xl flex-col gap-12 px-4 py-8 sm:px-6 lg:px-8",
+        )}
+      >
         {children}
       </main>
 
       <footer className="border-t border-white/10 bg-slate-950/70">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 text-sm text-slate-400 sm:px-6 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-          <div className="flex items-center gap-2">
-            <ScanSearch className="size-4 text-emerald-300" />
-            <span>
-              Renovación completa sobre React + Vite, con parsing robusto y mapas en
-              MapLibre.
-            </span>
+        <div className="mx-auto flex max-w-7xl flex-col gap-5 px-4 py-6 text-sm text-slate-400 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center gap-2">
+              <ScanSearch className="size-4 text-emerald-300" />
+              <span>
+                Aprende traceroute con una experiencia visual pensada para estudiantes y
+                exploración guiada.
+              </span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Globe2 className="size-4 text-cyan-300" />
+              <span>
+                Compara rutas locales y globales para entender cómo cambia internet según
+                el origen.
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <Globe2 className="size-4 text-cyan-300" />
-            <span>
-              GitHub Pages /route · MVP web con copy-paste o archivo · helper local en
-              fase futura
-            </span>
+
+          <div className="flex flex-col gap-3 border-t border-white/10 pt-4 text-sm text-slate-400 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-wrap items-center gap-3">
+              {navigation.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  className="transition-colors hover:text-white"
+                >
+                  {item.label}
+                </NavLink>
+              ))}
+            </div>
+            <div className="flex items-center gap-2">
+              <ScanSearch className="size-4 text-emerald-300" />
+              <span>Usa trazas y herramientas públicas con respeto.</span>
+            </div>
           </div>
         </div>
       </footer>

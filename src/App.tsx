@@ -13,6 +13,11 @@ const LocalPage = lazy(() =>
 const GlobalPage = lazy(() =>
   import("@/pages/global-page").then((module) => ({ default: module.GlobalPage })),
 )
+const ResourcesPage = lazy(() =>
+  import("@/pages/resources-page").then((module) => ({
+    default: module.ResourcesPage,
+  })),
+)
 const NotFoundPage = lazy(() =>
   import("@/pages/not-found-page").then((module) => ({
     default: module.NotFoundPage,
@@ -43,6 +48,7 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/local" element={<LocalPage />} />
             <Route path="/global" element={<GlobalPage />} />
+            <Route path="/resources" element={<ResourcesPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
