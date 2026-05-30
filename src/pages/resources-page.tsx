@@ -1,4 +1,5 @@
 import { BookOpenText, ExternalLink, HeartHandshake, ShieldCheck, Sparkles } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
 import { Badge } from "@/components/ui/badge"
@@ -6,32 +7,28 @@ import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 
-const usageRules = [
-  "Usa las herramientas públicas como recursos compartidos: evita pruebas repetitivas o automatizadas.",
-  "Antes de publicar una traza, revisa si aparecen nombres internos, hosts privados o datos que quieras ocultar.",
-  "Incluye contexto cuando compartas resultados: origen aproximado, destino y fecha ayudan a interpretarlos.",
-  "Si una herramienta externa falla, prueba otra región o vuelve más tarde en lugar de forzar consultas.",
-]
-
 const credits = [
   {
     name: "MapLibre GL",
-    description: "Motor de mapas usado para visualizar saltos con coordenadas.",
+    descriptionKey: "resources.credits.items.maplibre",
     href: "https://maplibre.org/",
   },
   {
     name: "CARTO basemaps",
-    description: "Estilos base del mapa que incluyen atribución de OpenStreetMap.",
+    descriptionKey: "resources.credits.items.carto",
     href: "https://carto.com/basemaps/",
   },
   {
     name: "OpenStreetMap",
-    description: "Datos de mapa atribuidos por los estilos base utilizados en la visualización.",
+    descriptionKey: "resources.credits.items.osm",
     href: "https://www.openstreetmap.org/copyright",
   },
 ]
 
 export function ResourcesPage() {
+  const { t } = useTranslation()
+  const usageRules = t("resources.usageRules", { returnObjects: true }) as string[]
+
   return (
     <div className="space-y-6">
       <section className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -39,19 +36,18 @@ export function ResourcesPage() {
           <CardHeader className="space-y-4">
             <div className="flex flex-wrap gap-2">
               <Badge className="bg-cyan-400/15 text-cyan-100 hover:bg-cyan-400/20">
-                Uso responsable
+                {t("resources.badge")}
               </Badge>
               <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                Guía rápida
+                {t("resources.guide")}
               </Badge>
             </div>
             <div>
               <CardTitle className="text-balance text-4xl text-white">
-                Aprende y comparte trazas sin exponer de más.
+                {t("resources.title")}
               </CardTitle>
               <CardDescription className="mt-3 max-w-2xl text-pretty text-base text-slate-300">
-                Estas pautas te ayudan a usar Uni Route en clase, estudio personal o
-                diagnóstico básico con respeto por tu privacidad y por servicios públicos.
+                {t("resources.description")}
               </CardDescription>
             </div>
           </CardHeader>
@@ -62,15 +58,14 @@ export function ResourcesPage() {
             <div className="flex items-center gap-3 text-emerald-200">
               <HeartHandshake className="size-5" />
               <span className="text-sm font-medium uppercase tracking-[0.2em]">
-                En comunidad
+                {t("resources.communityEyebrow")}
               </span>
             </div>
             <CardTitle className="text-balance text-white">
-              Las looking glasses son recursos compartidos por operadores y comunidades.
+              {t("resources.communityTitle")}
             </CardTitle>
             <CardDescription className="text-pretty text-slate-200">
-              Úsalas para aprender y comparar, no como herramientas de carga o monitoreo
-              automatizado.
+              {t("resources.communityDescription")}
             </CardDescription>
           </CardHeader>
         </Card>
@@ -81,10 +76,10 @@ export function ResourcesPage() {
           <CardHeader>
             <div className="flex items-center gap-3 text-cyan-200">
               <ShieldCheck className="size-5" />
-              <CardTitle className="text-white">Antes de compartir un resultado</CardTitle>
+              <CardTitle className="text-white">{t("resources.beforeSharing.title")}</CardTitle>
             </div>
             <CardDescription className="text-pretty text-slate-300">
-              Una traza puede mostrar más información de la que parece a primera vista.
+              {t("resources.beforeSharing.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -103,21 +98,18 @@ export function ResourcesPage() {
           <CardHeader>
             <div className="flex items-center gap-3 text-amber-200">
               <Sparkles className="size-5" />
-              <CardTitle className="text-white">Qué esperar de las herramientas externas</CardTitle>
+              <CardTitle className="text-white">{t("resources.external.title")}</CardTitle>
             </div>
             <CardDescription className="text-pretty text-slate-300">
-              Cada sitio puede cambiar su interfaz, exigir pasos manuales o estar
-              temporalmente fuera de servicio.
+              {t("resources.external.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 text-sm text-slate-300">
             <p>
-              El flujo más estable es abrir la herramienta externa, ejecutar traceroute
-              allí y pegar el resultado en Uni Route para visualizarlo.
+              {t("resources.external.bodyOne")}
             </p>
             <p>
-              Si un resultado no se interpreta bien, vuelve a la página global y prueba
-              otro formato de salida.
+              {t("resources.external.bodyTwo")}
             </p>
             <Link
               to="/global"
@@ -126,7 +118,7 @@ export function ResourcesPage() {
                 "min-h-11 rounded-2xl bg-cyan-400 px-5 text-slate-950 transition-transform duration-200 ease-out hover:bg-cyan-300 active:scale-[0.96]",
               )}
             >
-              Abrir Route Global
+              {t("common.openGlobal")}
             </Link>
           </CardContent>
         </Card>
@@ -137,10 +129,10 @@ export function ResourcesPage() {
           <CardHeader>
             <div className="flex items-center gap-3 text-fuchsia-200">
               <BookOpenText className="size-5" />
-              <CardTitle className="text-white">Créditos necesarios</CardTitle>
+              <CardTitle className="text-white">{t("resources.credits.title")}</CardTitle>
             </div>
             <CardDescription className="text-pretty text-slate-300">
-              Recursos externos que hacen posible la visualización del mapa.
+              {t("resources.credits.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -156,7 +148,7 @@ export function ResourcesPage() {
                   <div>
                     <p className="font-medium text-white">{credit.name}</p>
                     <p className="mt-2 text-pretty text-sm text-slate-300">
-                      {credit.description}
+                      {t(credit.descriptionKey)}
                     </p>
                   </div>
                   <ExternalLink className="mt-1 size-4 shrink-0 text-slate-500 transition-colors group-hover:text-cyan-200" />
@@ -168,10 +160,9 @@ export function ResourcesPage() {
 
         <Card className="rounded-[2rem] border-white/10 bg-white/5 shadow-[0_20px_80px_rgba(2,6,23,0.22)]">
           <CardHeader>
-            <CardTitle className="text-white">Ir directo a la práctica</CardTitle>
+            <CardTitle className="text-white">{t("resources.practice.title")}</CardTitle>
             <CardDescription className="text-pretty text-slate-300">
-              Elige una ruta local si tienes una salida de tu equipo, o una ruta global
-              para comparar regiones.
+              {t("resources.practice.description")}
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
@@ -182,7 +173,7 @@ export function ResourcesPage() {
                 "min-h-11 rounded-2xl bg-emerald-400 px-5 text-slate-950 transition-transform duration-200 ease-out hover:bg-emerald-300 active:scale-[0.96]",
               )}
             >
-              Abrir Route Local
+              {t("common.openLocal")}
             </Link>
             <a
               href="https://github.com/BOTOOM/route"
@@ -193,7 +184,7 @@ export function ResourcesPage() {
                 "min-h-11 rounded-2xl border-white/12 bg-white/5 px-5 text-slate-100 transition-transform duration-200 ease-out hover:bg-white/10 active:scale-[0.96]",
               )}
             >
-              Código fuente
+              {t("common.sourceCode")}
               <ExternalLink className="size-4" />
             </a>
           </CardContent>

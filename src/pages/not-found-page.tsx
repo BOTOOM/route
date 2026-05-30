@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { Link } from "react-router-dom"
 
 import { buttonVariants } from "@/components/ui/button"
@@ -5,12 +6,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { cn } from "@/lib/utils"
 
 export function NotFoundPage() {
+  const { t } = useTranslation()
+
   return (
     <Card className="border-white/10 bg-white/5">
       <CardHeader>
-        <CardTitle className="text-white">Ruta no encontrada</CardTitle>
+        <CardTitle className="text-white">{t("notFound.title")}</CardTitle>
         <CardDescription className="text-slate-400">
-          La página que buscas no existe dentro de Uni Route.
+          {t("notFound.description")}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -21,7 +24,7 @@ export function NotFoundPage() {
             "bg-emerald-400 text-slate-950 hover:bg-emerald-300",
           )}
         >
-          Volver al inicio
+          {t("notFound.cta")}
         </Link>
       </CardContent>
     </Card>

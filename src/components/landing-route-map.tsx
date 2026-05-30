@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
+import { useTranslation } from "react-i18next"
 
 import { Map, MapArc, MapMarker, MarkerContent, MarkerLabel } from "@/components/ui/map"
 
@@ -7,43 +8,43 @@ type LandingRouteMapProps = {
 }
 
 const routePoints: {
-  label: string
-  location: string
+  labelKey: string
+  locationKey: string
   ip: string
   coordinates: [number, number]
   latency: string
 }[] = [
   {
-    label: "Origen",
-    location: "Caribe",
+    labelKey: "home.mapPreview.points.origin.label",
+    locationKey: "home.mapPreview.points.origin.location",
     ip: "203.0.113.10",
     coordinates: [-69.93, 18.49],
     latency: "4 ms",
   },
   {
-    label: "Salto 2",
-    location: "Miami",
+    labelKey: "home.mapPreview.points.hop2.label",
+    locationKey: "home.mapPreview.points.hop2.location",
     ip: "198.51.100.24",
     coordinates: [-80.19, 25.76],
     latency: "31 ms",
   },
   {
-    label: "Salto 3",
-    location: "Nueva York",
+    labelKey: "home.mapPreview.points.hop3.label",
+    locationKey: "home.mapPreview.points.hop3.location",
     ip: "198.51.100.88",
     coordinates: [-74.01, 40.71],
     latency: "48 ms",
   },
   {
-    label: "Salto 4",
-    location: "Londres",
+    labelKey: "home.mapPreview.points.hop4.label",
+    locationKey: "home.mapPreview.points.hop4.location",
     ip: "192.0.2.34",
     coordinates: [-0.13, 51.51],
     latency: "92 ms",
   },
   {
-    label: "Destino",
-    location: "Frankfurt",
+    labelKey: "home.mapPreview.points.destination.label",
+    locationKey: "home.mapPreview.points.destination.location",
     ip: "192.0.2.80",
     coordinates: [8.68, 50.11],
     latency: "108 ms",
@@ -51,12 +52,13 @@ const routePoints: {
 ]
 
 export function LandingRouteMap({ reduceMotion }: LandingRouteMapProps) {
+  const { t } = useTranslation()
   const [activeHop, setActiveHop] = useState(1)
   const displayedHop = reduceMotion ? routePoints.length - 1 : activeHop
   const routeArcs = useMemo(
     () =>
       routePoints.slice(1).map((point, index) => ({
-        id: `${routePoints[index].location}-${point.location}`,
+        id: `${routePoints[index].locationKey}-${point.locationKey}`,
         from: routePoints[index].coordinates,
         to: point.coordinates,
       })),
@@ -83,15 +85,17 @@ export function LandingRouteMap({ reduceMotion }: LandingRouteMapProps) {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.22em] text-emerald-200/80">
-              Saltos IP geolocalizados
+              {t("home.mapPreview.eyebrow")}
             </p>
             <p className="mt-1 text-balance text-base font-semibold text-white sm:text-lg">
-              Puntos aproximados entre redes, no calles.
+              {t("home.mapPreview.title")}
             </p>
           </div>
           <div className="flex items-center gap-2 rounded-[1rem] border border-cyan-300/15 bg-cyan-400/10 px-3 py-2 text-sm">
-            <span className="text-slate-300">{currentPoint.label} activo</span>
-            <span className="font-semibold text-white">{currentPoint.location}</span>
+            <span className="text-slate-300">
+              {t("home.mapPreview.active", { label: t(currentPoint.labelKey) })}
+            </span>
+            <span className="font-semibold text-white">{t(currentPoint.locationKey)}</span>
             <span className="tabular-nums text-emerald-200">{currentPoint.latency}</span>
           </div>
         </div>
@@ -136,7 +140,7 @@ export function LandingRouteMap({ reduceMotion }: LandingRouteMapProps) {
 
             return (
               <MapMarker
-                key={point.label}
+                key={point.labelKey}
                 longitude={point.coordinates[0]}
                 latitude={point.coordinates[1]}
               >
@@ -152,7 +156,7 @@ export function LandingRouteMap({ reduceMotion }: LandingRouteMapProps) {
                     <span />
                   </div>
                   <MarkerLabel className="rounded-full bg-slate-950/80 px-2 py-1 text-[10px] font-medium text-cyan-100 shadow-lg shadow-slate-950/40">
-                    {point.location}
+                    {t(point.locationKey)}
                   </MarkerLabel>
                 </MarkerContent>
               </MapMarker>
@@ -163,7 +167,7 @@ export function LandingRouteMap({ reduceMotion }: LandingRouteMapProps) {
 
       <div className="border-t border-white/10 bg-slate-950/80 px-3 py-2 sm:px-4">
         <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-          <span className="text-slate-400">IP de ejemplo</span>
+          <span className="text-slate-400">{t("home.mapPreview.sampleIp")}</span>
           <span className="font-mono text-cyan-100">{currentPoint.ip}</span>
         </div>
       </div>

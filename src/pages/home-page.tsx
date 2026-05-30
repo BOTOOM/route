@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react"
+import { useTranslation } from "react-i18next"
 import { ArrowRight, Compass, Globe2, GraduationCap, MapPinned, Radar, ShieldCheck } from "lucide-react"
 import { useGSAP } from "@gsap/react"
 import gsap from "gsap"
@@ -15,61 +16,76 @@ gsap.registerPlugin(useGSAP)
 
 const quickActions = [
   {
-    title: "Analiza una ruta local",
-    description: "Pega la salida de tu terminal y mira cada salto como tabla, mapa y gráfica.",
+    titleKey: "home.quickActions.local.title",
+    descriptionKey: "home.quickActions.local.description",
     icon: MapPinned,
     href: "/local",
-    cta: "Empezar con mi equipo",
+    ctaKey: "home.quickActions.local.cta",
   },
   {
-    title: "Compara otra región",
-    description: "Usa herramientas públicas para observar cómo cambia la ruta desde otros continentes.",
+    titleKey: "home.quickActions.global.title",
+    descriptionKey: "home.quickActions.global.description",
     icon: Globe2,
     href: "/global",
-    cta: "Explorar rutas globales",
+    ctaKey: "home.quickActions.global.cta",
   },
 ]
 
 const learnCards = [
   {
-    title: "Dónde pasa la conexión",
-    description: "Identifica saltos, redes intermedias e IPs privadas sin leer una pared de texto.",
+    titleKey: "home.learnCards.path.title",
+    descriptionKey: "home.learnCards.path.description",
     icon: Radar,
   },
   {
-    title: "Qué salto se demora más",
-    description: "Compara latencias por punto y detecta cambios bruscos en segundos.",
+    titleKey: "home.learnCards.latency.title",
+    descriptionKey: "home.learnCards.latency.description",
     icon: Compass,
   },
   {
-    title: "Por qué una región cambia la ruta",
-    description: "Contrasta resultados locales y globales para aprender cómo se mueve internet.",
+    titleKey: "home.learnCards.region.title",
+    descriptionKey: "home.learnCards.region.description",
     icon: GraduationCap,
   },
 ]
 
 const steps = [
   {
-    label: "1",
-    title: "Consigue una traza",
-    description: "Usa tu terminal o una herramienta pública y copia el resultado completo.",
+    labelKey: "home.steps.one.label",
+    titleKey: "home.steps.one.title",
+    descriptionKey: "home.steps.one.description",
   },
   {
-    label: "2",
-    title: "Pégala en Uni Route",
-    description: "Elige si viene de tu equipo o de otra región y analiza el texto.",
+    labelKey: "home.steps.two.label",
+    titleKey: "home.steps.two.title",
+    descriptionKey: "home.steps.two.description",
   },
   {
-    label: "3",
-    title: "Lee la ruta visualmente",
-    description: "Explora saltos, tiempos y ubicación aproximada desde una sola vista.",
+    labelKey: "home.steps.three.label",
+    titleKey: "home.steps.three.title",
+    descriptionKey: "home.steps.three.description",
   },
 ]
 
 const statItems = [
-  { value: "2", label: "formas de explorar" },
-  { value: "3", label: "vistas del resultado" },
-  { value: "24/7", label: "aprendizaje web" },
+  { value: "2", labelKey: "home.stats.modes" },
+  { value: "3", labelKey: "home.stats.views" },
+  { value: "24/7", labelKey: "home.stats.web" },
+]
+
+const heroHighlights = [
+  {
+    titleKey: "home.heroHighlights.paste.title",
+    descriptionKey: "home.heroHighlights.paste.description",
+  },
+  {
+    titleKey: "home.heroHighlights.observe.title",
+    descriptionKey: "home.heroHighlights.observe.description",
+  },
+  {
+    titleKey: "home.heroHighlights.compare.title",
+    descriptionKey: "home.heroHighlights.compare.description",
+  },
 ]
 
 const LandingRouteMap = lazy(() =>
@@ -79,10 +95,13 @@ const LandingRouteMap = lazy(() =>
 )
 
 function AnimatedTagline({ reduceMotion }: { reduceMotion: boolean }) {
+  const { t } = useTranslation()
+  const tagline = t("home.tagline")
+
   if (reduceMotion) {
     return (
       <p className="font-heading text-xl font-semibold tracking-wide text-cyan-200 sm:text-2xl">
-        Traza, compara y aprende.
+        {tagline}
       </p>
     )
   }
@@ -97,9 +116,9 @@ function AnimatedTagline({ reduceMotion }: { reduceMotion: boolean }) {
         stagger: { advance: "38%", duration: 0.48 },
       }}
       className="font-heading text-[1.35rem] font-semibold tracking-wide text-cyan-200 sm:text-[1.9rem]"
-      aria-label="Traza, compara y aprende."
+      aria-label={tagline}
     >
-      Traza, compara y aprende.
+      {tagline}
     </TegakiRenderer>
   )
 }
@@ -116,7 +135,7 @@ function MapFallback() {
       </div>
       <div className="absolute inset-x-4 bottom-4 grid gap-2 sm:grid-cols-3">
         {statItems.map((item) => (
-          <div key={item.label} className="rounded-[1.1rem] border border-white/10 bg-slate-950/70 p-3">
+          <div key={item.labelKey} className="rounded-[1.1rem] border border-white/10 bg-slate-950/70 p-3">
             <div className="h-4 w-10 animate-pulse rounded-full bg-cyan-300/20" />
             <div className="mt-2 h-3 w-24 animate-pulse rounded-full bg-white/10" />
           </div>
@@ -127,6 +146,8 @@ function MapFallback() {
 }
 
 function HeroVisual({ reduceMotion }: { reduceMotion: boolean }) {
+  const { t } = useTranslation()
+
   return (
     <div className="landing-hero-visual relative overflow-hidden rounded-[2rem] border border-white/12 bg-slate-950/65 p-3 shadow-[0_24px_90px_rgba(2,6,23,0.5)] sm:p-4">
       <div className="landing-side-glow landing-side-glow-cyan" aria-hidden="true" />
@@ -136,9 +157,9 @@ function HeroVisual({ reduceMotion }: { reduceMotion: boolean }) {
       </Suspense>
       <div className="mt-3 grid gap-3 sm:grid-cols-3">
         {statItems.map((item) => (
-          <div key={item.label} className="landing-visual-card">
+          <div key={item.labelKey} className="landing-visual-card">
             <div className="tabular-nums text-2xl font-semibold text-white">{item.value}</div>
-            <p className="mt-1 text-sm text-slate-300">{item.label}</p>
+            <p className="mt-1 text-sm text-slate-300">{t(item.labelKey)}</p>
           </div>
         ))}
       </div>
@@ -149,6 +170,7 @@ function HeroVisual({ reduceMotion }: { reduceMotion: boolean }) {
 export function HomePage() {
   const scopeRef = useRef<HTMLDivElement>(null)
   const [reduceMotion, setReduceMotion] = useState(false)
+  const { t } = useTranslation()
 
   useEffect(() => {
     const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)")
@@ -228,21 +250,20 @@ export function HomePage() {
           <div className="flex flex-col justify-center space-y-7">
             <div data-hero-item className="flex flex-wrap gap-2">
               <Badge className="bg-emerald-400/15 text-emerald-100 hover:bg-emerald-400/20">
-                Aprende redes visualmente
+                {t("home.badges.visual")}
               </Badge>
               <Badge variant="outline" className="border-cyan-400/20 bg-cyan-400/10 text-cyan-100">
-                Local y global
+                {t("home.badges.scope")}
               </Badge>
             </div>
 
             <div data-hero-item className="space-y-4">
               <AnimatedTagline reduceMotion={reduceMotion} />
               <h1 className="max-w-3xl text-balance font-heading text-4xl font-semibold tracking-tight text-white sm:text-6xl lg:text-7xl">
-                Entiende por dónde viaja tu conexión a internet.
+                {t("home.title")}
               </h1>
               <p className="max-w-2xl text-pretty text-lg leading-8 text-slate-300">
-                Convierte una salida de traceroute en puntos geográficos aproximados,
-                saltos IP, latencia y comparación entre regiones.
+                {t("home.description")}
               </p>
             </div>
 
@@ -254,7 +275,7 @@ export function HomePage() {
                   "min-h-11 rounded-2xl bg-emerald-400 px-5 text-slate-950 shadow-[0_18px_50px_rgba(16,185,129,0.28)] transition-transform duration-200 ease-out hover:bg-emerald-300 active:scale-[0.96]",
                 )}
               >
-                Analizar mi traceroute
+                {t("home.primaryCta")}
                 <ArrowRight className="size-4" />
               </Link>
               <Link
@@ -264,7 +285,7 @@ export function HomePage() {
                   "min-h-11 rounded-2xl border-white/12 bg-white/6 px-5 text-slate-100 shadow-[0_18px_40px_rgba(2,6,23,0.25)] transition-transform duration-200 ease-out hover:bg-white/10 active:scale-[0.96]",
                 )}
               >
-                Comparar otra región
+                {t("home.secondaryCta")}
               </Link>
             </div>
 
@@ -272,24 +293,16 @@ export function HomePage() {
               data-hero-item
               className="grid gap-3 rounded-[1.75rem] border border-white/10 bg-white/5 p-4 shadow-[0_20px_70px_rgba(2,6,23,0.25)] sm:grid-cols-3"
             >
-              <div className="rounded-2xl bg-slate-950/45 p-4">
-                <div className="tabular-nums text-2xl font-semibold text-white">Pega</div>
-                <p className="mt-2 text-pretty text-sm text-slate-300">
-                  Usa texto o archivo de traceroute.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-slate-950/45 p-4">
-                <div className="tabular-nums text-2xl font-semibold text-white">Observa</div>
-                <p className="mt-2 text-pretty text-sm text-slate-300">
-                  Lee saltos IP, mapa y latencia juntos.
-                </p>
-              </div>
-              <div className="rounded-2xl bg-slate-950/45 p-4">
-                <div className="tabular-nums text-2xl font-semibold text-white">Compara</div>
-                <p className="mt-2 text-pretty text-sm text-slate-300">
-                  Prueba rutas desde otras regiones.
-                </p>
-              </div>
+              {heroHighlights.map((item) => (
+                <div key={item.titleKey} className="rounded-2xl bg-slate-950/45 p-4">
+                  <div className="tabular-nums text-2xl font-semibold text-white">
+                    {t(item.titleKey)}
+                  </div>
+                  <p className="mt-2 text-pretty text-sm text-slate-300">
+                    {t(item.descriptionKey)}
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -303,7 +316,7 @@ export function HomePage() {
         <div className="grid gap-4 lg:grid-cols-2">
           {quickActions.map((action) => (
             <Card
-              key={action.title}
+              key={action.titleKey}
               className="rounded-[1.75rem] border-white/10 bg-white/5 shadow-[0_20px_70px_rgba(2,6,23,0.22)]"
             >
               <CardHeader className="space-y-4">
@@ -311,9 +324,11 @@ export function HomePage() {
                   <action.icon className="size-5" />
                 </div>
                 <div>
-                  <CardTitle className="text-balance text-2xl text-white">{action.title}</CardTitle>
+                  <CardTitle className="text-balance text-2xl text-white">
+                    {t(action.titleKey)}
+                  </CardTitle>
                   <CardDescription className="mt-2 text-pretty text-base text-slate-300">
-                    {action.description}
+                    {t(action.descriptionKey)}
                   </CardDescription>
                 </div>
               </CardHeader>
@@ -325,7 +340,7 @@ export function HomePage() {
                     "min-h-11 rounded-2xl bg-cyan-400 px-5 text-slate-950 transition-transform duration-200 ease-out hover:bg-cyan-300 active:scale-[0.96]",
                   )}
                 >
-                  {action.cta}
+                  {t(action.ctaKey)}
                   <ArrowRight className="size-4" />
                 </Link>
               </CardContent>
@@ -336,21 +351,20 @@ export function HomePage() {
         <div className="mt-12 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <div className="space-y-4">
             <Badge className="bg-white/8 text-slate-200 hover:bg-white/10">
-              Qué puedes aprender
+              {t("home.sections.read.eyebrow")}
             </Badge>
             <h2 className="max-w-xl text-balance font-heading text-3xl font-semibold text-white sm:text-4xl">
-              Lee internet paso a paso, sin memorizar comandos complicados.
+              {t("home.sections.read.title")}
             </h2>
             <p className="max-w-lg text-pretty text-slate-300">
-              Uni Route te guía desde el texto que ya tienes hasta una vista clara para
-              estudiar, enseñar o comparar rutas.
+              {t("home.sections.read.description")}
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {learnCards.map((card) => (
               <Card
-                key={card.title}
+                key={card.titleKey}
                 className="rounded-[1.75rem] border-white/10 bg-slate-950/45 shadow-[0_20px_70px_rgba(2,6,23,0.2)]"
               >
                 <CardHeader className="space-y-4">
@@ -358,9 +372,11 @@ export function HomePage() {
                     <card.icon className="size-5" />
                   </div>
                   <div>
-                    <CardTitle className="text-balance text-xl text-white">{card.title}</CardTitle>
+                    <CardTitle className="text-balance text-xl text-white">
+                      {t(card.titleKey)}
+                    </CardTitle>
                     <CardDescription className="mt-2 text-pretty text-slate-300">
-                      {card.description}
+                      {t(card.descriptionKey)}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -374,31 +390,32 @@ export function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-6 px-4 py-12 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8 lg:py-16">
           <div className="space-y-4">
             <Badge className="bg-cyan-400/14 text-cyan-100 hover:bg-cyan-400/18">
-              Cómo empezar
+              {t("home.sections.steps.eyebrow")}
             </Badge>
             <h2 className="max-w-xl text-balance font-heading text-3xl font-semibold text-white sm:text-4xl">
-              Tres pasos y ya estás explorando.
+              {t("home.sections.steps.title")}
             </h2>
             <p className="max-w-lg text-pretty text-slate-300">
-              Si ya tienes una salida de traceroute, puedes entrar directo. Si no, cada
-              herramienta te muestra qué copiar.
+              {t("home.sections.steps.description")}
             </p>
           </div>
 
           <div className="grid gap-4 md:grid-cols-3">
             {steps.map((step) => (
               <Card
-                key={step.label}
+                key={step.labelKey}
                 className="rounded-[1.75rem] border-white/10 bg-slate-950/45 shadow-[0_20px_70px_rgba(2,6,23,0.2)]"
               >
                 <CardHeader className="space-y-4">
                   <div className="flex size-10 items-center justify-center rounded-2xl bg-cyan-400/12 font-semibold tabular-nums text-cyan-100">
-                    {step.label}
+                    {t(step.labelKey)}
                   </div>
                   <div>
-                    <CardTitle className="text-balance text-xl text-white">{step.title}</CardTitle>
+                    <CardTitle className="text-balance text-xl text-white">
+                      {t(step.titleKey)}
+                    </CardTitle>
                     <CardDescription className="mt-2 text-pretty text-slate-300">
-                      {step.description}
+                      {t(step.descriptionKey)}
                     </CardDescription>
                   </div>
                 </CardHeader>
@@ -415,15 +432,14 @@ export function HomePage() {
               <div className="flex items-center gap-3 text-emerald-200">
                 <ShieldCheck className="size-5" />
                 <span className="text-sm font-medium uppercase tracking-[0.2em]">
-                  Explora con cuidado
+                  {t("home.responsible.eyebrow")}
                 </span>
               </div>
               <h2 className="max-w-2xl text-balance font-heading text-3xl font-semibold text-white">
-                Empieza con una ruta y comparte solo lo necesario.
+                {t("home.responsible.title")}
               </h2>
               <p className="max-w-2xl text-pretty text-slate-300">
-                Revisa datos sensibles antes de publicar una traza y usa las herramientas
-                públicas de forma respetuosa.
+                {t("home.responsible.description")}
               </p>
             </div>
 
@@ -435,7 +451,7 @@ export function HomePage() {
                   "min-h-11 rounded-2xl bg-emerald-400 px-5 text-slate-950 transition-transform duration-200 ease-out hover:bg-emerald-300 active:scale-[0.96]",
                 )}
               >
-                Ir a Route Local
+                {t("home.responsible.localCta")}
               </Link>
               <Link
                 to="/resources"
@@ -444,7 +460,7 @@ export function HomePage() {
                   "min-h-11 rounded-2xl border-white/12 bg-white/5 px-5 text-slate-100 transition-transform duration-200 ease-out hover:bg-white/10 active:scale-[0.96]",
                 )}
               >
-                Ver uso responsable
+                {t("home.responsible.resourcesCta")}
               </Link>
             </div>
           </div>
