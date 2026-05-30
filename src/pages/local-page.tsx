@@ -1,5 +1,11 @@
-import { lazy, Suspense, useRef, useState } from "react"
-import { AlertTriangle, HardDriveUpload, MonitorCog, TerminalSquare } from "lucide-react"
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react"
+import {
+  AlertTriangle,
+  Copy,
+  HardDriveUpload,
+  MonitorCog,
+  TerminalSquare,
+} from "lucide-react"
 
 import { enrichTraceWithGeo, parseTrace, type ParsedTrace, type TraceSource } from "@/lib/traceroute"
 import { Badge } from "@/components/ui/badge"
@@ -42,19 +48,19 @@ const localSources: {
   value: Extract<TraceSource, "windows" | "linux">
   label: string
   command: string
-  helper: string
+  hint: string
 }[] = [
   {
     value: "windows",
     label: "Windows",
     command: "tracert github.com",
-    helper: "Perfil pensado para la salida clásica de `tracert`.",
+    hint: "Copia el resultado completo que aparece después de ejecutar `tracert`.",
   },
   {
     value: "linux",
     label: "Linux / macOS",
     command: "traceroute github.com",
-    helper: "Funciona bien para salidas tipo traceroute clásico en Unix.",
+    hint: "Copia todas las líneas que devuelve `traceroute`, incluso las que tengan asteriscos.",
   },
 ]
 
@@ -67,6 +73,16 @@ export function LocalPage() {
   const [resolvingGeo, setResolvingGeo] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const requestIdRef = useRef(0)
+  const copyFeedbackTimeoutRef = useRef<number | null>(null)
+  const copyLabelRef = useRef<HTMLSpanElement | null>(null)
+
+  useEffect(() => {
+    return () => {
+      if (copyFeedbackTimeoutRef.current !== null) {
+        window.clearTimeout(copyFeedbackTimeoutRef.current)
+      }
+    }
+  }, [])
 
   async function handleAnalyze() {
     setError(null)
@@ -120,6 +136,46 @@ export function LocalPage() {
 
   const activeSource = localSources.find((item) => item.value === source) ?? localSources[0]
 
+  const handleCopyCommand = useCallback(() => {
+    setError(null)
+    if (copyLabelRef.current) {
+      copyLabelRef.current.textContent = "Copiado"
+    }
+
+    if (copyFeedbackTimeoutRef.current !== null) {
+      window.clearTimeout(copyFeedbackTimeoutRef.current)
+    }
+
+    copyFeedbackTimeoutRef.current = window.setTimeout(() => {
+      if (copyLabelRef.current) {
+        copyLabelRef.current.textContent = "Copiar"
+      }
+      copyFeedbackTimeoutRef.current = null
+    }, 1800)
+
+    void copyTextToClipboard(activeSource.command).catch((copyError: unknown) => {
+      setError(
+        copyError instanceof Error
+          ? `No fue posible copiar el comando: ${copyError.message}`
+          : "No fue posible copiar el comando. Cópialo manualmente desde la tarjeta.",
+      )
+    })
+  }, [activeSource.command])
+
+  useEffect(() => {
+    const copyButton = document.querySelector<HTMLButtonElement>(
+      "[data-copy-command-button='true']",
+    )
+
+    if (!copyButton) {
+      return
+    }
+
+    copyButton.addEventListener("click", handleCopyCommand)
+
+    return () => copyButton.removeEventListener("click", handleCopyCommand)
+  }, [handleCopyCommand])
+
   return (
     <div className="space-y-6">
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
@@ -129,17 +185,14 @@ export function LocalPage() {
               <Badge className="bg-emerald-400/15 text-emerald-200 hover:bg-emerald-400/20">
                 Route Local
               </Badge>
-              <Badge variant="outline" className="border-white/10 bg-white/5 text-slate-300">
-                MVP web
-              </Badge>
             </div>
             <div>
               <CardTitle className="text-3xl text-white">
-                Analiza traceroutes generados en tu propio equipo
+                Analiza una ruta generada en tu propio equipo
               </CardTitle>
               <CardDescription className="mt-3 max-w-2xl text-base text-slate-300">
-                Elige el sistema operativo, pega la salida o carga un `.txt`, y obtén
-                una vista moderna con hops, latencia, mapa y contexto geográfico.
+                Ejecuta un comando, pega la salida o carga un archivo, y convierte el
+                resultado en saltos, latencia y mapa.
               </CardDescription>
             </div>
           </CardHeader>
@@ -147,15 +200,14 @@ export function LocalPage() {
 
         <Card className="border-amber-400/15 bg-amber-400/10">
           <CardHeader>
-            <CardTitle className="text-white">Sobre el traceroute automático</CardTitle>
+            <CardTitle className="text-white">Cómo obtener la traza</CardTitle>
             <CardDescription className="text-slate-200">
-              El navegador no puede invocar `tracert` o `traceroute` nativos del OS.
+              Por seguridad, el navegador no ejecuta comandos de tu sistema.
             </CardDescription>
           </CardHeader>
           <CardContent className="text-sm text-slate-200">
-            Por eso el flujo actual es seguro y compatible con GitHub Pages: pegas el
-            resultado o subes el archivo. El helper/CLI que ejecutará el traceroute
-            local y lo entregará a la app queda preparado como siguiente fase.
+            Abre una terminal, ejecuta el comando sugerido y pega aquí el resultado.
+            También puedes guardar la salida en un archivo de texto y subirlo.
           </CardContent>
         </Card>
       </section>
@@ -163,10 +215,9 @@ export function LocalPage() {
       <section className="grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Configurar análisis</CardTitle>
+            <CardTitle className="text-white">Prepara tu resultado</CardTitle>
             <CardDescription className="text-slate-400">
-              Cambia entre Windows y Linux/macOS para ajustar el parser a la salida que
-              generaste.
+              Elige tu sistema para que Uni Route lea mejor el texto que vas a pegar.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
@@ -193,14 +244,32 @@ export function LocalPage() {
                   </Button>
                 ))}
               </div>
-              <p className="text-sm text-slate-400">{activeSource.helper}</p>
-              <div className="rounded-2xl border border-white/10 bg-slate-950/40 p-4 font-mono text-sm text-cyan-200">
-                {activeSource.command}
+              <p className="text-sm text-slate-400">{activeSource.hint}</p>
+              <div className="rounded-2xl border border-white/10 bg-slate-950/45 p-3 shadow-2xl shadow-slate-950/20">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                      Comando sugerido
+                    </p>
+                    <code className="mt-1 block break-all font-mono text-sm text-cyan-200">
+                      {activeSource.command}
+                    </code>
+                  </div>
+                  <button
+                    type="button"
+                    data-copy-command-button="true"
+                    className="inline-flex min-h-10 shrink-0 items-center justify-center gap-1.5 rounded-xl border border-cyan-300/30 bg-cyan-300/10 px-3 text-sm font-medium text-cyan-100 outline-none transition-transform duration-200 ease-out hover:bg-cyan-300/20 focus-visible:ring-3 focus-visible:ring-cyan-300/40 active:scale-[0.96]"
+                    aria-label={`Copiar comando para ${activeSource.label}`}
+                  >
+                    <Copy className="size-4" />
+                    <span ref={copyLabelRef}>Copiar</span>
+                  </button>
+                </div>
               </div>
             </div>
 
             <div className="space-y-3">
-              <p className="text-sm font-medium text-slate-200">Modo de ingreso</p>
+              <p className="text-sm font-medium text-slate-200">Cómo vas a ingresar el resultado</p>
               <div className="flex flex-wrap gap-2">
                 <Button
                   variant={inputMode === "paste" ? "default" : "outline"}
@@ -211,7 +280,7 @@ export function LocalPage() {
                   )}
                   onClick={() => setInputMode("paste")}
                 >
-                  Texto plano
+                  Pegar texto
                 </Button>
                 <Button
                   variant={inputMode === "file" ? "default" : "outline"}
@@ -263,7 +332,7 @@ export function LocalPage() {
             ) : null}
 
             <Button
-              className="bg-emerald-400 text-slate-950 hover:bg-emerald-300"
+              className="min-h-11 bg-emerald-400 text-slate-950 transition-transform duration-200 ease-out hover:bg-emerald-300 active:scale-[0.96]"
               size="lg"
               onClick={handleAnalyze}
             >
@@ -274,10 +343,9 @@ export function LocalPage() {
 
         <Card className="border-white/10 bg-white/5">
           <CardHeader>
-            <CardTitle className="text-white">Ayuda contextual</CardTitle>
+            <CardTitle className="text-white">Consejos rápidos</CardTitle>
             <CardDescription className="text-slate-400">
-              Conserva la lógica educativa del proyecto original, pero con una estructura
-              más clara y moderna.
+              Pequeñas pistas para que el resultado sea más fácil de interpretar.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -296,7 +364,7 @@ export function LocalPage() {
                   </p>
                   <p>
                     Si tu herramienta devuelve líneas con `* * *`, pégalas también; el
-                    parser las conservará como hops sin respuesta.
+                    análisis las conservará como saltos sin respuesta.
                   </p>
                 </AccordionContent>
               </AccordionItem>
@@ -322,13 +390,12 @@ export function LocalPage() {
                 className="rounded-2xl border border-white/10 bg-slate-950/35 px-4"
               >
                 <AccordionTrigger className="text-white">
-                  Qué mejoró frente al proyecto legacy
+                  Qué revisar antes de compartir una traza
                 </AccordionTrigger>
                 <AccordionContent className="space-y-2 pb-4 text-sm text-slate-300">
-                  <p>El parser ya no depende de partir cada línea por espacios fijos.</p>
                   <p>
-                    La geolocalización se sincroniza con todas las promesas antes de
-                    dibujar mapa y estadísticas.
+                    Si vas a publicar una captura o un texto, revisa nombres internos,
+                    etiquetas de red o direcciones que prefieras mantener privadas.
                   </p>
                 </AccordionContent>
               </AccordionItem>
@@ -347,4 +414,48 @@ export function LocalPage() {
       </Suspense>
     </div>
   )
+}
+
+async function copyTextToClipboard(text: string) {
+  if (copyTextWithSelection(text)) {
+    return
+  }
+
+  if (!navigator.clipboard || !window.isSecureContext) {
+    throw new Error("El navegador no permitió acceder al portapapeles.")
+  }
+
+  try {
+    await Promise.race([
+      navigator.clipboard.writeText(text),
+      new Promise((_, reject) => {
+        window.setTimeout(
+          () => reject(new Error("El portapapeles tardó demasiado en responder.")),
+          800,
+        )
+      }),
+    ])
+  } catch (clipboardError) {
+    throw clipboardError instanceof Error
+      ? clipboardError
+      : new Error("El navegador no permitió acceder al portapapeles.")
+  }
+}
+
+function copyTextWithSelection(text: string) {
+  const textArea = document.createElement("textarea")
+  textArea.value = text
+  textArea.setAttribute("readonly", "")
+  textArea.style.position = "fixed"
+  textArea.style.left = "-9999px"
+  textArea.style.top = "0"
+  document.body.appendChild(textArea)
+  textArea.focus()
+  textArea.select()
+
+  try {
+    return document.execCommand("copy")
+  } finally {
+    document.body.removeChild(textArea)
+  }
 }
